@@ -22,13 +22,14 @@
 - Contador de iterações;
 
 ## Gerador de bytes pseudo-aleatórios (randgen)
-Usando o método PBKDF2, gerar uma *key* de 256 bits a partir da palavra-passe, da *confusion string* e do contador de iterações.
+Gerar uma *key* de 256 bits a partir da palavra-passe, da *confusion string* e do contador de iterações.
 
-1. Transformar a *confusion string* numa sequência de bytes do mesmo tamanho da palavra-passe (HMAC?);
-2. Inicializar a gerador com a *seed*;
-3. Usar o gerador para gerar os bytes pseudo-aleatórios, até que o padrão da *confusion string* seja encontrado;
-4. Usar o gerador para produzir a nova *seed* e usar essa *seed* para gerar os bytes pseudo-aleatórios.
-5. Repetir os passos 3 e 4 n vezes (n = contador de iterações).
+1. Computar uma *seed* para a palavra-passe, a *confusion string* e o contador de iterações, usando o método PBKDF2;
+2. Transformar a *confusion string* numa sequência de bytes do mesmo tamanho da palavra-passe HMAC (*confusion pattern*);
+3. Inicializar o gerador com a *seed*;
+4. Começar um ciclo com 'contador de iterações' iterações;
+    1. Usar o PRNG para gerar um conjunto de bytes pseudo-aleatórios, até que o padrão da *confusion string* seja encontrado;
+    2. Usar o PRNG para produzir a nova *seed* e usar essa *seed* para gerar os bytes pseudo-aleatórios.
 
 
 ## Gerador de chaves RSA (rsagen)
