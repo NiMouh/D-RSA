@@ -8,6 +8,7 @@
 #include <openssl/evp.h>
 #include <openssl/rand.h>
 #include <openssl/sha.h>
+#include <openssl/pem.h>
 #include <openssl/rsa.h>
 
 // Constants
@@ -94,7 +95,40 @@ void randgen(const char *password, const char *confusion_string, int iterations,
 }
 
 /**
- * @brief This function generates a RSA key pair
+ * @brief This function stores the RSA key pair in a PEM file.
+ *
+ * @param key_pair The RSA key pair to be stored
+ * @param private_key_filename The name of the file to store the key pair
+ * @param public_key_filename The name of the file to store the key pair
+ */
+void storekey(RSA *key_pair, const char *private_key_filename, const char *public_key_filename)
+{
+    FILE *private_key_file = fopen(private_key_filename, "wb");
+    if (!private_key_file)
+    {
+        fprintf(stderr, "Error opening file\n");
+        exit(1);
+    }
+
+    // TODO: Store the RSA key pair in a PEM file
+
+    fclose(private_key_file);
+
+    FILE *public_key_file = fopen(public_key_filename, "wb");
+    if (!public_key_file)
+    {
+        fprintf(stderr, "Error opening file\n");
+        exit(1);
+    }
+
+    // TODO: Store the RSA key pair in a PEM file
+
+    fclose(public_key_file);
+
+}
+
+/**
+ * @brief This function generates a RSA key pair using the randgen() function to generate random byte values, and stores it in a PEM file.
  *
  * @param password The password to be used as seed
  * @param confusion_string The confusion string to be used as seed
@@ -103,7 +137,14 @@ void randgen(const char *password, const char *confusion_string, int iterations,
  */
 void rsagen(const char *password, const char *confusion_string, int iterations)
 {
-    // TODO: Implement this function
+    // Generate a pseudo-random byte array
+    uint8_t output[RSA_KEY_SIZE];
+    randgen(password, confusion_string, iterations, output);
+
+    // TODO: Generate the RSA key pair
+
+    // Store the RSA key pair in a PEM file
+    // storekey(rsa, "private_key.pem", "public_key.pem");
 }
 
 int main(int argc, char **argv) // TODO: Usage => ./rsa <key_size> <password> <confusion_string> <iterations>
@@ -124,6 +165,9 @@ int main(int argc, char **argv) // TODO: Usage => ./rsa <key_size> <password> <c
         printf("%02x", output[index]);
     }
     printf("\n");
+
+    // Generate the RSA key pair
+    // rsagen(password, confusion_string, iterations);
 
     return 0;
 }
