@@ -1,10 +1,18 @@
+// Standard libraries
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include <openssl/sha.h>
+
+// OpenSSL libraries
 #include <openssl/evp.h>
-#include <openssl/hmac.h>
+#include <openssl/rand.h>
+#include <openssl/sha.h>
+#include <openssl/rsa.h>
+
+// Constants
+#define RSA_KEY_SIZE 2048
+#define RANDGEN_OUTPUT_SIZE 32
 
 /**
  * @file rsa.c
@@ -21,117 +29,101 @@
 /**
  * @brief This function generates a pseudo-random byte array,
  *
- * @param array_size The size of the byte array to be generated
  * @param password The password to be used as seed
  * @param confusion_string The confusion string to be used as seed
  * @param iterations The number of iterations to be used as seed
  * @param output The output byte array
  *
  */
-void randgen(size_t array_size, uint8_t *password, uint8_t *confusion_string, int iterations, uint8_t *output)
+void randgen(const char *password, const char *confusion_string, int iterations, uint8_t *output) // The setup of such a generator should be long and complex, in order to complicate its cryptanalysis (discovery of the actual seed).
 {
-    const EVP_CIPHER *cipher = EVP_aes_256_ctr();
-    const int key_len = EVP_CIPHER_key_length(cipher);
-    const int iv_len = EVP_CIPHER_iv_length(cipher);
-
-    uint8_t key[key_len];
-    uint8_t iv[iv_len];
-    uint8_t bootstrap_seed[key_len + iv_len];
-
-    // 1.1 Derive the key and IV from the password
-    if (!PKCS5_PBKDF2_HMAC((const char *)password, strlen((const char *)password), confusion_string, strlen((const char *)confusion_string), iterations, EVP_sha256(), key_len + iv_len, bootstrap_seed))
+    // 1. Compute a bootstrap seed from the password, the confusion string and the iteration count. Consider, for instance, using the PBKDF2 method;
+    uint8_t bootstrap_seed[SHA256_DIGEST_LENGTH];
+    if(!PKCS5_PBKDF2_HMAC(password, strlen(password), (const unsigned char *)confusion_string, strlen(confusion_string), iterations, EVP_sha256(), SHA256_DIGEST_LENGTH, bootstrap_seed))
     {
-        fprintf(stderr, "Error deriving key and IV from password\n");
+        fprintf(stderr, "Error generating bootstrap seed\n");
         exit(1);
     }
 
-    // 1.2 Split the bootstrap seed into key and IV
-    memcpy(key, bootstrap_seed, key_len);
-    memcpy(iv, bootstrap_seed + key_len, iv_len);
-
-    // 2. Transform the confusion string into an equal sequence of bytes (confusion pattern)
-    uint8_t confusion_pattern[array_size];
-    int confusion_string_index = 0;
-    for (int confusion_pattern_index = 0; confusion_pattern_index < array_size; confusion_pattern_index++)
+    // 2. Transform the confusion string into an equal length sequence of bytes (confusion pattern). These resulting bytes should be able to have any value;
+    uint8_t confusion_pattern[strlen(confusion_string)];
+    for(int index = 0; index < strlen(confusion_string); index++)
     {
-        confusion_pattern[confusion_pattern_index] = confusion_string[confusion_string_index];
-        confusion_string_index = (confusion_string_index + 1) % strlen((const char *)confusion_string);
+        confusion_pattern[index] = confusion_string[index] ^ bootstrap_seed[index];
     }
 
-    // 3. Initialize the PRNG with the bootstrap seed
-    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-    if (EVP_EncryptInit_ex(ctx, cipher, NULL, key, iv) != 1)
+    // 3. Initialize the generator with the bootstrap seed;
+    EVP_CIPHER_CTX *ctx;
+    const EVP_CIPHER *cipher = EVP_aes_256_ecb(); // Use the AES-256 cipher in ECB mode
+
+    // Initialize the context
+    if (!(ctx = EVP_CIPHER_CTX_new()))
     {
-        fprintf(stderr, "Error initializing the PRNG\n");
-        EVP_CIPHER_CTX_free(ctx);
-        return;
+        fprintf(stderr, "Error creating context\n");
+        exit(1);
     }
 
-    // 4. Start a loop that 'iterations' times where:
-    for (int index = 0; index < iterations; index++)
+    if (EVP_CipherInit_ex(ctx, cipher, NULL, bootstrap_seed, NULL, 1) != 1)
     {
-        // 4.1 Use the PRNG to produce a pseudo-random byte array of size 'array_size'
-        uint8_t pseudo_random_byte_array[array_size];
-        int out_len;
-        if (EVP_EncryptUpdate(ctx, pseudo_random_byte_array, &out_len, confusion_pattern, array_size) != 1)
+        fprintf(stderr, "Error initializing cipher\n");
+        exit(1);
+    }
+
+    int output_length; // Declare the variable for output length
+    // For the number of iterations:
+    for (int iteration = 0; iteration < iterations; iteration++)
+    {
+        // 4. Use the generator to produce a pseudo-random stream of bytes
+        if (EVP_CipherUpdate(ctx, output, &output_length, output, SHA256_DIGEST_LENGTH) != 1)
         {
-            fprintf(stderr, "Error generating pseudo-random byte array\n");
-            EVP_CIPHER_CTX_free(ctx);
-            return;
+            fprintf(stderr, "Error generating pseudo-random stream\n");
+            exit(1);
         }
 
-        // 4.2 Check if the confusion pattern is a substring of the generated array
-        if (strstr((const char *)pseudo_random_byte_array, (const char *)confusion_pattern) != NULL)
+        // 5. Stopping when the confusion pattern is found in the pseudo-random stream;
+        if (memcmp(output, confusion_pattern, sizeof(confusion_pattern)) == 0)
         {
-            memcpy(output, pseudo_random_byte_array, array_size);
-            EVP_CIPHER_CTX_free(ctx);
-            return;
+            // 6. Use the generator to produce a new seed and use that seed to re-initialize the generator;
+            if (EVP_CipherInit_ex(ctx, cipher, NULL, output, NULL, 1) != 1)
+            {
+                fprintf(stderr, "Error initializing cipher\n");
+                exit(1);
+            }
         }
-
-        // 4.3 Use a hash function to produce a new seed and use that seed to reinitialize the PRNG
-        SHA256(pseudo_random_byte_array, array_size, key);
     }
-
-    EVP_CIPHER_CTX_free(ctx);
 }
 
 /**
  * @brief This function generates a RSA key pair
  *
- * @param key_size The size of the key to be generated
  * @param password The password to be used as seed
  * @param confusion_string The confusion string to be used as seed
  * @param iterations The number of iterations to be used as seed
- * @param public_key The public key to be generated
- * @param private_key The private key to be generated
  *
  */
-void rsagen(size_t key_size, uint8_t *password, uint8_t *confusion_string, int iterations, uint8_t *public_key, uint8_t *private_key)
+void rsagen(const char *password, const char *confusion_string, int iterations)
 {
     // TODO: Implement this function
 }
 
-int main(int argc, char **argv)
+int main(int argc, char **argv) // TODO: Usage => ./rsa <key_size> <password> <confusion_string> <iterations>
 {
     // Example usage
-    size_t array_size = 16;
-    uint8_t password[] = "MySecretPassword";
-    uint8_t confusion_string[] = "MyS1cretConfusionStri";
+    char password[] = "MySecretPassword";
+    char confusion_string[] = "MySecretConfusionStri";
     int iterations = 10000;
-    uint8_t output[array_size];
+    uint8_t output[RANDGEN_OUTPUT_SIZE];
+
 
     // Generate a pseudo-random byte array
-    randgen(array_size, password, confusion_string, iterations, output);
+    randgen(password, confusion_string, iterations, output);
 
     // Print the generated array
-    printf("Generated Array: ");
-    for (size_t i = 0; i < array_size; ++i)
+    for (int index = 0; index < RANDGEN_OUTPUT_SIZE; index++)
     {
-        printf("%02X ", output[i]);
+        printf("%02x", output[index]);
     }
     printf("\n");
-
-    // TODO: Usage => ./rsa <key_size> <password> <confusion_string> <iterations>
 
     return 0;
 }
