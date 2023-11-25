@@ -22,75 +22,111 @@
  *
  * @date 2023-11-16
  *
- * @author Ana Raquel Neves Vidal
- * @author Simão Augusto Ferreira Andrade
+ * @author Ana Raquel Neves Vidal (118408)
+ * @author Simão Augusto Ferreira Andrade (118345)
  *
  */
 
 /**
- * @brief This function generates a pseudo-random byte array,
+ * @brief This function checks if a subarray is contained in an array
  *
- * @param password The password to be used as seed
- * @param confusion_string The confusion string to be used as seed
- * @param iterations The number of iterations to be used as seed
- * @param output The output byte array
+ * @param subarray The subarray to be checked
+ * @param subarray_length The length of the subarray
+ * @param array The array to be checked
+ * @param array_length The length of the array
+ * @return 1 if the subarray is contained in the array, 0 otherwise
+ */
+int pattern_found(uint8_t *subarray, int subarray_length, uint8_t *array, int array_length)
+{
+    if (subarray_length > array_length)
+    {
+        fprintf(stderr, "Subarray length is bigger than array length\n");
+        return 0;
+    }
+
+    for (int index = 0; index < array_length - subarray_length; index++)
+    {
+        if (memcmp(subarray, array + index, subarray_length) == 0)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+/**
+ * @brief Function to initialize the generator with the bootstrap seed
+ *
+ * @param seed value that will start the generator
+ */
+void initialize_generator(const uint8_t *seed)
+{
+    // TODO: Implement the initialization of the generator using the bootstrap seed
+    RAND_seed(seed, SHA256_DIGEST_LENGTH);
+}
+
+/**
+ * @brief Function to use the generator to produce a pseudo-random stream of bytes
+ *
+ * @param stream a pointer to an array where the bytes will be allocated
+ * @param stream_size the size of the array
  *
  */
-void randgen(const char *password, const char *confusion_string, int iterations, uint8_t *output) // The setup of such a generator should be long and complex, in order to complicate its cryptanalysis (discovery of the actual seed).
+void generate_pseudo_random_stream(uint8_t *stream, int stream_size)
+{
+    // TODO: Implement the logic to generate a pseudo-random stream
+    // Example:
+    RAND_bytes(stream, stream_size);
+}
+
+/**
+ * @brief This function generates a pseudo-random byte stream
+ *
+ * @param size The size of the byte stream to be generated
+ * @param password The password to be used
+ * @param confusion_string The confusion string to be used
+ * @param iterations The number of iterations to be used
+ * @param bytes The output byte array
+ *
+ */
+void randgen(int size, const char *password, const char *confusion_string, int iterations, uint8_t *bytes)
 {
     // 1. Compute a bootstrap seed from the password, the confusion string and the iteration count. Consider, for instance, using the PBKDF2 method;
     uint8_t bootstrap_seed[SHA256_DIGEST_LENGTH];
-    if(!PKCS5_PBKDF2_HMAC(password, strlen(password), (const unsigned char *)confusion_string, strlen(confusion_string), iterations, EVP_sha256(), SHA256_DIGEST_LENGTH, bootstrap_seed))
+    if (!PKCS5_PBKDF2_HMAC(password, strlen(password), (const unsigned char *)confusion_string, strlen(confusion_string), iterations, EVP_sha256(), SHA256_DIGEST_LENGTH, bootstrap_seed))
     {
         fprintf(stderr, "Error generating bootstrap seed\n");
         exit(1);
     }
 
     // 2. Transform the confusion string into an equal length sequence of bytes (confusion pattern). These resulting bytes should be able to have any value;
-    uint8_t confusion_pattern[strlen(confusion_string)];
-    for(int index = 0; index < strlen(confusion_string); index++)
+    int confusion_pattern_length = strlen(confusion_string);
+    uint8_t confusion_pattern[confusion_pattern_length];
+    for (int index = 0; index < confusion_pattern_length; index++)
     {
-        confusion_pattern[index] = confusion_string[index] ^ bootstrap_seed[index];
+        confusion_pattern[index] = confusion_string[index];
     }
 
-    // 3. Initialize the generator with the bootstrap seed;
-    EVP_CIPHER_CTX *ctx;
-    const EVP_CIPHER *cipher = EVP_aes_256_ecb(); // Use the AES-256 cipher in ECB mode
+    uint8_t pseudo_random_stream[size];
 
-    // Initialize the context
-    if (!(ctx = EVP_CIPHER_CTX_new()))
-    {
-        fprintf(stderr, "Error creating context\n");
-        exit(1);
-    }
+    // Initialize the generator with the bootstrap seed
+    initialize_generator(bootstrap_seed);
 
-    if (EVP_CipherInit_ex(ctx, cipher, NULL, bootstrap_seed, NULL, 1) != 1)
-    {
-        fprintf(stderr, "Error initializing cipher\n");
-        exit(1);
-    }
-
-    int output_length; // Declare the variable for output length
-    // For the number of iterations:
     for (int iteration = 0; iteration < iterations; iteration++)
     {
-        // 4. Use the generator to produce a pseudo-random stream of bytes
-        if (EVP_CipherUpdate(ctx, output, &output_length, output, SHA256_DIGEST_LENGTH) != 1)
+        while (!pattern_found(confusion_pattern, confusion_pattern_length, pseudo_random_stream, size))
         {
-            fprintf(stderr, "Error generating pseudo-random stream\n");
-            exit(1);
+            // Use the generator to produce a pseudo-random stream of bytes
+            generate_pseudo_random_stream(pseudo_random_stream, size);
         }
 
-        // 5. Stopping when the confusion pattern is found in the pseudo-random stream;
-        if (memcmp(output, confusion_pattern, sizeof(confusion_pattern)) == 0)
-        {
-            // 6. Use the generator to produce a new seed and use that seed to re-initialize the generator;
-            if (EVP_CipherInit_ex(ctx, cipher, NULL, output, NULL, 1) != 1)
-            {
-                fprintf(stderr, "Error initializing cipher\n");
-                exit(1);
-            }
-        }
+        // If it's found then the pseudo-random stream becomes the new seed
+        printf("Found confusion pattern in pseudo-random stream\n");
+        memcpy(bootstrap_seed, pseudo_random_stream, size);
+
+        // Re-initialize the generator with the updated seed for the next iteration
+        initialize_generator(bootstrap_seed);
     }
 }
 
@@ -124,7 +160,6 @@ void storekey(RSA *key_pair, const char *private_key_filename, const char *publi
     // TODO: Store the RSA key pair in a PEM file
 
     fclose(public_key_file);
-
 }
 
 /**
@@ -139,7 +174,7 @@ void rsagen(const char *password, const char *confusion_string, int iterations)
 {
     // Generate a pseudo-random byte array
     uint8_t output[RSA_KEY_SIZE];
-    randgen(password, confusion_string, iterations, output);
+    randgen(RSA_KEY_SIZE, password, confusion_string, iterations, output);
 
     // TODO: Generate the RSA key pair
 
@@ -151,13 +186,12 @@ int main(int argc, char **argv) // TODO: Usage => ./rsa <key_size> <password> <c
 {
     // Example usage
     char password[] = "MySecretPassword";
-    char confusion_string[] = "MySecretConfusionStri";
-    int iterations = 10000;
+    char confusion_string[] = "foafjaklfnhakfj";
+    int iterations = 3;
     uint8_t output[RANDGEN_OUTPUT_SIZE];
 
-
     // Generate a pseudo-random byte array
-    randgen(password, confusion_string, iterations, output);
+    randgen(RANDGEN_OUTPUT_SIZE, password, confusion_string, iterations, output);
 
     // Print the generated array
     for (int index = 0; index < RANDGEN_OUTPUT_SIZE; index++)
