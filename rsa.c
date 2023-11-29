@@ -61,29 +61,28 @@ int pattern_found(uint8_t A[], int a_size, uint8_t B[], int b_size) {
 }
 
 /**
- * @brief Function to initialize the generator with the bootstrap seed
- *
- * @param seed value that will start the generator
- */
-void initialize_generator(const uint8_t *seed)
-{
-    // TODO: Implement the initialization of the generator using the bootstrap seed
-    RAND_seed(seed, SEED_SIZE);
-}
-
-/**
  * @brief Function to use the generator to produce a pseudo-random stream of bytes
  *
  * @param stream a pointer to an array where the bytes will be allocated
  * @param stream_size the size of the array
- *
+ * @param seed value that will start the generator
  */
-void generate_pseudo_random_stream(uint8_t *stream, int stream_size)
+void generate_pseudo_random_stream(uint8_t *stream, int stream_size, uint8_t *seed)
 {
-    // Use a separate buffer for each iteration
-    uint8_t temp_buffer[stream_size];
-    RAND_bytes(temp_buffer, stream_size);
-    memcpy(stream, temp_buffer, stream_size);
+    uint8_t hash_output[SHA256_DIGEST_LENGTH];
+
+    for (int index = 0; index < stream_size; index += SHA256_DIGEST_LENGTH)
+    {
+        // Use SHA-256 to hash the seed
+        SHA256(seed, SEED_SIZE, hash_output);
+
+        // Copy the hash output to the stream
+        int bytes_to_copy = (index + SHA256_DIGEST_LENGTH <= stream_size) ? SHA256_DIGEST_LENGTH : stream_size - index;
+        memcpy(stream + index, hash_output, bytes_to_copy);
+
+        // Update the seed with the hash output for the next iteration
+        memcpy(seed, hash_output, SHA256_DIGEST_LENGTH);
+    }
 }
 
 /**
@@ -113,13 +112,12 @@ void randgen(int size, const char *password, const char *confusion_string, int i
     memcpy(seed, key_derivator, SEED_SIZE);
     memcpy(confusion_pattern, key_derivator + SEED_SIZE, strlen(confusion_string));
 
-    initialize_generator(seed);
     for (int iteration = 0; iteration < iterations; iteration++)
     {
         uint8_t temp_buffer[size];
         while (1)
         {
-            generate_pseudo_random_stream(temp_buffer, size);
+            generate_pseudo_random_stream(temp_buffer, size, seed);
 
             // Check for the pattern
             if (pattern_found(confusion_pattern, strlen(confusion_string), temp_buffer, size))
@@ -129,7 +127,7 @@ void randgen(int size, const char *password, const char *confusion_string, int i
         }
         
         memcpy(bytes, temp_buffer, size);
-        initialize_generator(bytes + size - SEED_SIZE);
+        memcpy(seed, bytes + size - SEED_SIZE, SEED_SIZE);
     }
 }
 
