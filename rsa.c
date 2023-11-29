@@ -14,6 +14,7 @@
 // Constants
 #define RSA_KEY_SIZE 2048
 #define RANDGEN_OUTPUT_SIZE 32
+#define SEED_SIZE 32
 
 /**
  * @file rsa.c
@@ -28,31 +29,35 @@
  */
 
 /**
- * @brief This function checks if a subarray is contained in an array
- *
- * @param subarray The subarray to be checked
- * @param subarray_length The length of the subarray
- * @param array The array to be checked
- * @param array_length The length of the array
- * @return 1 if the subarray is contained in the array, 0 otherwise
+ * @brief Function to check if A is a subarray of B
+ * 
+ * @param A reference array A
+ * @param a_size size of A
+ * @param B reference array B
+ * @param b_size size of B
+ * 
+ * @return 1 if A is a subarray of B, 0 otherwise
  */
-int pattern_found(uint8_t *subarray, int subarray_length, uint8_t *array, int array_length)
-{
-    if (subarray_length > array_length)
-    {
-        fprintf(stderr, "Subarray length is bigger than array length\n");
-        return 0;
+int pattern_found(uint8_t A[], int a_size, uint8_t B[], int b_size) {
+    if (a_size > b_size) {
+        printf("A is longer than B\n");
+        return 0;  // A cannot be a subarray of B if A is longer than B
     }
 
-    for (int index = 0; index < array_length - subarray_length; index++)
-    {
-        if (memcmp(subarray, array + index, subarray_length) == 0)
-        {
+    for (int i = 0; i <= b_size - a_size; i++) {
+        int j;
+        for (j = 0; j < a_size; j++) {
+            if (B[i + j] != A[j]) {
+                break;  // Break if there is a mismatch
+            }
+        }
+
+        if (j == a_size) {
             return 1;
         }
     }
 
-    return 0;
+    return 0;  // A is not a subarray of B
 }
 
 /**
@@ -63,7 +68,7 @@ int pattern_found(uint8_t *subarray, int subarray_length, uint8_t *array, int ar
 void initialize_generator(const uint8_t *seed)
 {
     // TODO: Implement the initialization of the generator using the bootstrap seed
-    RAND_seed(seed, SHA256_DIGEST_LENGTH);
+    RAND_seed(seed, SEED_SIZE);
 }
 
 /**
@@ -75,9 +80,10 @@ void initialize_generator(const uint8_t *seed)
  */
 void generate_pseudo_random_stream(uint8_t *stream, int stream_size)
 {
-    // TODO: Implement the logic to generate a pseudo-random stream
-    // Example:
-    RAND_bytes(stream, stream_size);
+    // Use a separate buffer for each iteration
+    uint8_t temp_buffer[stream_size];
+    RAND_bytes(temp_buffer, stream_size);
+    memcpy(stream, temp_buffer, stream_size);
 }
 
 /**
@@ -92,41 +98,38 @@ void generate_pseudo_random_stream(uint8_t *stream, int stream_size)
  */
 void randgen(int size, const char *password, const char *confusion_string, int iterations, uint8_t *bytes)
 {
-    // 1. Compute a bootstrap seed from the password, the confusion string and the iteration count. Consider, for instance, using the PBKDF2 method;
-    uint8_t bootstrap_seed[SHA256_DIGEST_LENGTH];
-    if (!PKCS5_PBKDF2_HMAC(password, strlen(password), (const unsigned char *)confusion_string, strlen(confusion_string), iterations, EVP_sha256(), SHA256_DIGEST_LENGTH, bootstrap_seed))
+    uint8_t key_derivator[SEED_SIZE + strlen(confusion_string)];
+    uint8_t seed[SEED_SIZE];
+    uint8_t confusion_pattern[strlen(confusion_string)];
+
+    // PBKDF2 to generate the key derivator
+    if (PKCS5_PBKDF2_HMAC(password, strlen(password), (const unsigned char *)confusion_string, strlen(confusion_string), iterations, EVP_sha256(), SEED_SIZE + strlen(confusion_string), key_derivator) != 1)
     {
-        fprintf(stderr, "Error generating bootstrap seed\n");
+        fprintf(stderr, "Error generating key derivator\n");
         exit(1);
     }
 
-    // 2. Transform the confusion string into an equal length sequence of bytes (confusion pattern). These resulting bytes should be able to have any value;
-    int confusion_pattern_length = strlen(confusion_string);
-    uint8_t confusion_pattern[confusion_pattern_length];
-    for (int index = 0; index < confusion_pattern_length; index++)
-    {
-        confusion_pattern[index] = confusion_string[index];
-    }
+    // Get the seed and the confusion pattern from the key derivator
+    memcpy(seed, key_derivator, SEED_SIZE);
+    memcpy(confusion_pattern, key_derivator + SEED_SIZE, strlen(confusion_string));
 
-    uint8_t pseudo_random_stream[size];
-
-    // Initialize the generator with the bootstrap seed
-    initialize_generator(bootstrap_seed);
-
+    initialize_generator(seed);
     for (int iteration = 0; iteration < iterations; iteration++)
     {
-        while (!pattern_found(confusion_pattern, confusion_pattern_length, pseudo_random_stream, size))
+        uint8_t temp_buffer[size];
+        while (1)
         {
-            // Use the generator to produce a pseudo-random stream of bytes
-            generate_pseudo_random_stream(pseudo_random_stream, size);
+            generate_pseudo_random_stream(temp_buffer, size);
+
+            // Check for the pattern
+            if (pattern_found(confusion_pattern, strlen(confusion_string), temp_buffer, size))
+            {
+                break;
+            }
         }
-
-        // If it's found then the pseudo-random stream becomes the new seed
-        printf("Found confusion pattern in pseudo-random stream\n");
-        memcpy(bootstrap_seed, pseudo_random_stream, size);
-
-        // Re-initialize the generator with the updated seed for the next iteration
-        initialize_generator(bootstrap_seed);
+        
+        memcpy(bytes, temp_buffer, size);
+        initialize_generator(bytes + size - SEED_SIZE);
     }
 }
 
@@ -140,24 +143,35 @@ void randgen(int size, const char *password, const char *confusion_string, int i
 void storekey(RSA *key_pair, const char *private_key_filename, const char *public_key_filename)
 {
     FILE *private_key_file = fopen(private_key_filename, "wb");
+    FILE *public_key_file = fopen(public_key_filename, "wb");
+
     if (!private_key_file)
     {
         fprintf(stderr, "Error opening file\n");
         exit(1);
     }
 
-    // TODO: Store the RSA key pair in a PEM file
+    // Store the RSA key pair in a PEM file
+    if (PEM_write_RSAPrivateKey(private_key_file, key_pair, NULL, NULL, 0, NULL, NULL) != 1)
+    {
+        fprintf(stderr, "Error writing private key\n");
+        exit(1);
+    }
 
     fclose(private_key_file);
 
-    FILE *public_key_file = fopen(public_key_filename, "wb");
     if (!public_key_file)
     {
         fprintf(stderr, "Error opening file\n");
         exit(1);
     }
 
-    // TODO: Store the RSA key pair in a PEM file
+    // Store the RSA key pair in a PEM file
+    if(PEM_write_RSAPublicKey(public_key_file, key_pair) != 1)
+    {
+        fprintf(stderr, "Error writing public key\n");
+        exit(1);
+    }
 
     fclose(public_key_file);
 }
@@ -169,39 +183,64 @@ void storekey(RSA *key_pair, const char *private_key_filename, const char *publi
  * @param confusion_string The confusion string to be used as seed
  * @param iterations The number of iterations to be used as seed
  *
+ * @return The RSA key pair
  */
-void rsagen(const char *password, const char *confusion_string, int iterations)
+RSA* rsagen(const char *password, const char *confusion_string, int iterations)
 {
-    // Generate a pseudo-random byte array
+    BIGNUM *big_number = BN_new();
+    RSA *key_pair = RSA_new();
+
     uint8_t output[RSA_KEY_SIZE];
     randgen(RSA_KEY_SIZE, password, confusion_string, iterations, output);
 
-    // TODO: Generate the RSA key pair
+    if (!BN_bin2bn(output, RSA_KEY_SIZE, big_number)) {
+        fprintf(stderr, "Error converting binary to BIGNUM\n");
+        BN_free(big_number);
+        exit(EXIT_FAILURE);
+    }
 
-    // Store the RSA key pair in a PEM file
-    // storekey(rsa, "private_key.pem", "public_key.pem");
+    // Set the public exponent
+    BIGNUM *exponent = BN_new();
+    BN_set_word(exponent, RSA_F4);  // 65537 or 2^16 + 1
+
+    if (!RSA_generate_key_ex(key_pair, RSA_KEY_SIZE, exponent, NULL)) {
+        fprintf(stderr, "Error generating RSA key pair\n");
+        ERR_print_errors_fp(stderr);
+        BN_free(exponent);
+        BN_free(big_number);
+        exit(EXIT_FAILURE);
+    }
+
+    BN_free(exponent);
+    BN_free(big_number);
+    return key_pair;
 }
 
-int main(int argc, char **argv) // TODO: Usage => ./rsa <key_size> <password> <confusion_string> <iterations>
+
+int main(int argc, char **argv)
 {
-    // Example usage
-    char password[] = "MySecretPassword";
-    char confusion_string[] = "foafjaklfnhakfj";
-    int iterations = 3;
-    uint8_t output[RANDGEN_OUTPUT_SIZE];
-
-    // Generate a pseudo-random byte array
-    randgen(RANDGEN_OUTPUT_SIZE, password, confusion_string, iterations, output);
-
-    // Print the generated array
-    for (int index = 0; index < RANDGEN_OUTPUT_SIZE; index++)
+    if (argc != 5) // Usage => ./rsa <password> <confusion_string> <iterations>
     {
-        printf("%02x", output[index]);
+        fprintf(stderr, "Usage: ./rsa <password> <confusion_string> <iterations>\n");
+        exit(1);
     }
-    printf("\n");
+
+    const char *password = argv[2];
+    const char *confusion_string = argv[3];
+    int iterations = atoi(argv[4]);
 
     // Generate the RSA key pair
-    // rsagen(password, confusion_string, iterations);
+    RSA *key_pair = rsagen(password, confusion_string, iterations);
+    if (!key_pair){
+        fprintf(stderr, "Error generating RSA key pair\n");
+        exit(1);
+    }
+
+    // Store the RSA key pair
+    storekey(key_pair, "private_key.pem", "public_key.pem");
+
+    // Free the RSA key pair
+    RSA_free(key_pair);
 
     return 0;
 }

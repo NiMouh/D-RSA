@@ -34,3 +34,10 @@ Gerar uma *key* de 256 bits a partir da palavra-passe, da *confusion string* e d
 
 ## Gerador de chaves RSA (rsagen)
 Por escrever...
+
+## Perguntas Sessão de Dúvidas 15h JAVA
+1. Como lidar quando o gerador de bytes pseudoaleatórios ao ser comparado com o confusionPattern falha ou leva um tempo excessivo?
+2. Para a geração de uma stream de bytes, isto é o algoritmo pseudoaleatório, estou a usar a cifra continua CTR, mas não sei se é a melhor opção, tanto ao nivel de complexidade ou se a estratégia aplicada faz sentido?
+3. Como posso fazer para que o algoritmo de geração de bytes pseudoaleatórios seja mais rápido?
+4. A função que compara a stream de bytes gerada com o confusionPattern, deve consistir em comparar o bloco todo gerado, ou apenas um byte? Pois partes maiores pode aumentar a precisão, mas tambem o custo computacional, isto é pode ser mais eficiente comparar partes menores, mas isso reduz a precissão da verificação, mas tambem não acho que isso comprometa a segurança na geração das chaves?
+5. Como devo ajustar o número de iterações do algoritmo de geração de bytes pseudoaleatórios, isto é, até quantas iterações devo considerar ter, ou isso é indiferente? E que impacto irei ter no tempo de execução?
