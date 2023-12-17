@@ -14,7 +14,7 @@
 
 ## Bibliotecas
 - [OpenSSL](https://www.openssl.org/)
-- ...
+- [BigInteger](https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html)
 
 ## Parâmetros de entrada
 - Palavra-passe com N bytes;
@@ -33,11 +33,13 @@ Gerar uma *key* de 256 bits a partir da palavra-passe, da *confusion string* e d
 
 
 ## Gerador de chaves RSA (rsagen)
-Por escrever...
 
-## Perguntas Sessão de Dúvidas 15h JAVA
-1. Como lidar quando o gerador de bytes pseudoaleatórios ao ser comparado com o confusionPattern falha ou leva um tempo excessivo?
-2. Para a geração de uma stream de bytes, isto é o algoritmo pseudoaleatório, estou a usar a cifra continua CTR, mas não sei se é a melhor opção, tanto ao nivel de complexidade ou se a estratégia aplicada faz sentido?
-3. Como posso fazer para que o algoritmo de geração de bytes pseudoaleatórios seja mais rápido?
-4. A função que compara a stream de bytes gerada com o confusionPattern, deve consistir em comparar o bloco todo gerado, ou apenas um byte? Pois partes maiores pode aumentar a precisão, mas tambem o custo computacional, isto é pode ser mais eficiente comparar partes menores, mas isso reduz a precissão da verificação, mas tambem não acho que isso comprometa a segurança na geração das chaves?
-5. Como devo ajustar o número de iterações do algoritmo de geração de bytes pseudoaleatórios, isto é, até quantas iterações devo considerar ter, ou isso é indiferente? E que impacto irei ter no tempo de execução?
+O par de chaves RSA será gerado através do gerador de bytes pseudo-aleatórios, da seguinte forma:
+1. Gerar um conjunto de bytes pseudo-aleatórios com o tamanho da chave RSA (em bytes);
+2. Será dividido o conjunto de bytes em dois conjuntos de bytes, sendo que o primeiro conjunto irá representar o nosso *p* e o segundo conjunto irá representar o nosso *q*, ambos em formato BIGNUMBER/BigInteger;
+3. Será verificado se os dois conjuntos de bytes são primos, caso não sejam, o seu valor será incrementado até que sejam primos;
+4. Será calculado o valor de *n* através da multiplicação de *p* e *q*;
+5. O valor de *e* é fixo, sendo que o seu valor é 65537 (2^16 + 1);
+6. Será calculado o valor de *d* através da função *modular inverse* de *e* e *phi(n)*, sendo que *phi(n)* é calculado através da multiplicação de *(p-1)* e *(q-1)*;
+
+Após isso, será guardado o par de chaves RSA em dois ficheiros de texto, sendo que um deles irá conter a chave pública (n,e) e o outro irá conter a chave privada (n,d).

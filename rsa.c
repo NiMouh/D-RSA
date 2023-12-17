@@ -260,8 +260,9 @@ RSA_KEY_PAIR rsagen(uint8_t *bytes)
     BIGNUM *n = BN_new();
     BIGNUM *e = BN_new();
     BIGNUM *d = BN_new();
+    BIGNUM *phi_n = BN_new();
     BN_CTX *ctx = BN_CTX_new();
-    if (!p || !q || !n || !e || !d || !ctx)
+    if (!p || !q || !n || !e || !d || !phi_n || !ctx)
     {
         fprintf(stderr, "Error initializing BIGNUM variables\n");
         goto cleanup;
@@ -305,15 +306,33 @@ RSA_KEY_PAIR rsagen(uint8_t *bytes)
         goto cleanup;
     }
 
+    if (!BN_sub_word(p, 1)) // p = p - 1
+    {
+        fprintf(stderr, "Error decrementing P\n");
+        goto cleanup;
+    }
+
+    if (!BN_sub_word(q, 1)) // q = q - 1
+    {
+        fprintf(stderr, "Error decrementing Q\n");
+        goto cleanup;
+    }
+
+    if (!BN_mul(phi_n, p, q, ctx)) // phi(n) = (p - 1) * (q - 1)
+    {
+        fprintf(stderr, "Error calculating phi(n)\n");
+        goto cleanup;
+    }
+
     if (!BN_set_word(e, RSA_F4)) // 2^16 + 1
     {
         fprintf(stderr, "Error setting exponent\n");
         goto cleanup;
     }
 
-    if (!BN_mod_inverse(d, e, n, ctx)) // d = e^-1 mod n
+    if (!BN_mod_inverse(d, e, phi_n, ctx))
     {
-        fprintf(stderr, "Error calculating private exponent\n");
+        fprintf(stderr, "Error calculating d\n");
         goto cleanup;
     }
 
