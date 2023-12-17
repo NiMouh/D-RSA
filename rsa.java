@@ -148,17 +148,9 @@ import java.security.PrivateKey;
         byte[] p_bytes = Arrays.copyOfRange(random_stream_bytes, 0, random_stream_bytes.length / 2);
         byte[] q_bytes = Arrays.copyOfRange(random_stream_bytes, random_stream_bytes.length / 2, random_stream_bytes.length);
 
-        // tornar o p e q como bignumbers
+        // tornar o p e q como bignumbers e certificar que são primos
         BigInteger p = new BigInteger(1, p_bytes).nextProbablePrime();
         BigInteger q = new BigInteger(1, q_bytes).nextProbablePrime();
-
-        for(int i = 0; i < random_stream_bytes.length / 2; i++){
-            
-            p_bytes[i] = random_stream_bytes[i];
-        }
-        for(int i = 0; i < random_stream_bytes.length / 2; i++){
-            q_bytes[i] = random_stream_bytes[random_stream_bytes.length / 2 + i];
-        }
 
         // Calcular o n
         BigInteger n = p.multiply(q);
@@ -186,7 +178,7 @@ import java.security.PrivateKey;
         // Imprimir o par de chaves
         System.out.println("Public Key: " + encodeToBase64(keyPair.getPublic().getEncoded()));
         System.out.println("Private Key: " + encodeToBase64(keyPair.getPrivate().getEncoded()));
-        
+
         // Retornar o par de chaves
         return keyPair;
     }
