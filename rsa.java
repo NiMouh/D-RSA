@@ -1,19 +1,16 @@
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
+import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Base64;
-import java.security.MessageDigest;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.math.BigInteger;
-import java.security.spec.RSAPrivateKeySpec;
-import java.security.spec.RSAPublicKeySpec;
-import java.security.PrivateKey;
 
- public class RSA {
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.SecretKeyFactory;
+
+import java.io.*;
+
+public class RSAV2 {
     public static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA256";
     public static final int SIZE_STREAM = 2048; // Tamanho da chave RSA
     public static final int ITERATIONS = 10; // Número máximo de iterações
@@ -24,12 +21,15 @@ import java.security.PrivateKey;
     public static final BigInteger e = BigInteger.valueOf(65537); // Valor de e
     
     public static void main(String[] args) throws Exception {
-        try {
-            byte[] random_stream_bytes = randgen(PASSWORD, CONFUSION_STRING, ITERATIONS, SIZE_STREAM / 8);
-            generateKeyPair(random_stream_bytes);
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
+        
+        // Generate random stream of bytes
+        byte[] random_stream_bytes = randgen(PASSWORD, CONFUSION_STRING, ITERATIONS, SIZE_STREAM / 8);
+
+        // Generate the key pair
+        BigInteger[][] keyPair = generateKeyPair(random_stream_bytes);
+
+        // Store the key pair in files
+        storeKeyPair(keyPair);
     }
 
     public static byte[] generateRandomBytes(int streamSize, byte[] seed) {
@@ -63,24 +63,6 @@ import java.security.PrivateKey;
         return Base64.getEncoder().encodeToString(data);
     }
 
-    public static boolean verificarPadrao1(byte[] mainArray, byte[] subArray) {
-        int mainLength = mainArray.length;
-        int subLength = subArray.length;
-    
-        int mainIndex = 0, subIndex = 0;
-    
-        while (mainIndex < mainLength && subIndex < subLength) {
-            if (mainArray[mainIndex] == subArray[subIndex]) {
-                mainIndex++;
-                subIndex++;
-            } else {
-                mainIndex = mainIndex - subIndex + 1; // Restart from the next index in mainArray
-                subIndex = 0; // Reset subIndex to start from the beginning of subArray
-            }
-        }
-    
-        return (subIndex == subLength); // Check if the entire subArray is traversed
-    }
     public static boolean verificarPadrao(byte[] A, byte[] B) {
 
         if(A.length > B.length){
@@ -143,7 +125,7 @@ import java.security.PrivateKey;
     }
 
     // Gerar o par de chaves RSA
-    public static KeyPair generateKeyPair(byte[] random_stream_bytes) throws Exception {
+    public static BigInteger[][] generateKeyPair(byte[] random_stream_bytes) throws Exception {
         // Dividir o stream aleatório em duas partes p e q
         byte[] p_bytes = Arrays.copyOfRange(random_stream_bytes, 0, random_stream_bytes.length / 2);
         byte[] q_bytes = Arrays.copyOfRange(random_stream_bytes, random_stream_bytes.length / 2, random_stream_bytes.length);
@@ -160,26 +142,70 @@ import java.security.PrivateKey;
 
         // Calcular o d
         BigInteger d = e.modInverse(phi);
+        
 
-        // Criar o par de chaves RSA usando o n e o d
-        //RSAKeyGenParameterSpec spec = new RSAKeyGenParameterSpec(n.bitLength(), e);
-        RSAPublicKeySpec pub = new RSAPublicKeySpec(n, e);
-        RSAPrivateKeySpec priv = new RSAPrivateKeySpec(n, d);
+        // criar a chave publica pub=(n,e)
+        BigInteger[] public_key = {n, e};
 
-        //Inicialize the Key Factory
-        KeyFactory KeyFactory = java.security.KeyFactory.getInstance("RSA");
+        // criar a minha chave privada priv=(n,d)
+        BigInteger[] private_key = {n, d};
 
-        PublicKey publicKey = KeyFactory.generatePublic(pub);
-        PrivateKey privateKey = KeyFactory.generatePrivate(priv);
+        //colocar num array o pub e priv
+        BigInteger[][] keyPair = {public_key, private_key};
 
-        KeyPair keyPair = new KeyPair(publicKey, privateKey);
-
-
-        // Imprimir o par de chaves
-        System.out.println("Public Key: " + encodeToBase64(keyPair.getPublic().getEncoded()));
-        System.out.println("Private Key: " + encodeToBase64(keyPair.getPrivate().getEncoded()));
-
-        // Retornar o par de chaves
         return keyPair;
+    }
+
+    // Function that receives the keyPair and stores the private key in a file and the public key in another file (private_key.pem and public_key.pem)
+    public static void storeKeyPair(BigInteger[][] keyPair) throws IOException {
+        // Get the public key
+        BigInteger[] public_key = keyPair[0];
+
+        // passar o n e o e para um array de bytes
+        byte[] n_bytes = public_key[0].toByteArray();
+        byte[] e_bytes = public_key[1].toByteArray();
+
+        // juntar o n e o e num array de bytes
+        byte[] public_key_bytes = new byte[n_bytes.length + e_bytes.length];
+        System.arraycopy(n_bytes, 0, public_key_bytes, 0, n_bytes.length);
+        System.arraycopy(e_bytes, 0, public_key_bytes, n_bytes.length, e_bytes.length);
+
+        // codificar o array de bytes para base64
+        String public_key_base64 = encodeToBase64(public_key_bytes);
+
+        // imprimir a chave publica
+        System.out.println("------BEGIN PUBLIC KEY------\n" + public_key_base64 + "\n------END PUBLIC KEY------\n");
+
+        // Get the private key
+        BigInteger[] private_key = keyPair[1];
+
+        // passar o n e o d para um array de bytes
+        byte[] n_bytes_priv = private_key[0].toByteArray();
+        byte[] d_bytes_priv = private_key[1].toByteArray();
+
+        // juntar o n e o d num array de bytes
+        byte[] private_key_bytes = new byte[n_bytes_priv.length + d_bytes_priv.length];
+        System.arraycopy(n_bytes_priv, 0, private_key_bytes, 0, n_bytes_priv.length);
+        System.arraycopy(d_bytes_priv, 0, private_key_bytes, n_bytes_priv.length, d_bytes_priv.length);
+
+        // codificar o array de bytes para base64
+        String private_key_base64 = encodeToBase64(private_key_bytes);
+
+        // imprimir a chave privada
+        System.out.println("------BEGIN PRIVATE KEY------\n" + private_key_base64 + "\n------END PRIVATE KEY------\n");
+
+        // Store the public key in a file
+        try (FileOutputStream outputStream = new FileOutputStream("public_key.pem")) {
+            outputStream.write(public_key_base64.getBytes());
+        }catch(Exception e){
+            System.out.println("Erro ao escrever no ficheiro");
+        }
+
+        // Store the private key in a file
+        try (FileOutputStream outputStream = new FileOutputStream("private_key.pem")) {
+            outputStream.write(private_key_base64.getBytes());
+        }catch(Exception e){
+            System.out.println("Erro ao escrever no ficheiro");
+        }
     }
 }
