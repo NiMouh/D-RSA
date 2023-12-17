@@ -6,7 +6,7 @@ import java.util.Base64;
 import java.security.MessageDigest;
 
 
- public class SecondProject {
+ public class RSA {
     public static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA256";
     public static final int SIZE_STREAM = 2048; // Tamanho da chave RSA
     public static final int ITERATIONS = 10; // Número máximo de iterações
