@@ -1,10 +1,17 @@
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
 import java.util.Base64;
 import java.security.MessageDigest;
-
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.math.BigInteger;
+import java.security.spec.RSAPrivateKeySpec;
+import java.security.spec.RSAPublicKeySpec;
+import java.security.PrivateKey;
 
  public class RSA {
     public static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA256";
@@ -14,14 +21,12 @@ import java.security.MessageDigest;
     public static final String CONFUSION_STRING = "abc";
     public static final int SEED =  32; // Tamanho da seed em bytes
     public static final int SHA256_DIGEST_LENGTH = 32; // Tamanho do output do SHA-256 em bytes
+    public static final BigInteger e = BigInteger.valueOf(65537); // Valor de e
+    
     public static void main(String[] args) throws Exception {
         try {
             byte[] random_stream_bytes = randgen(PASSWORD, CONFUSION_STRING, ITERATIONS, SIZE_STREAM / 8);
-            
-            for(int i = 0; i < random_stream_bytes.length; i++){
-                System.out.printf("%02x", random_stream_bytes[i]);
-            }
-            System.out.println();
+            generateKeyPair(random_stream_bytes);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             e.printStackTrace();
         }
@@ -135,5 +140,54 @@ import java.security.MessageDigest;
             }
         }
         return stream;
+    }
+
+    // Gerar o par de chaves RSA
+    public static KeyPair generateKeyPair(byte[] random_stream_bytes) throws Exception {
+        // Dividir o stream aleatório em duas partes p e q
+        byte[] p_bytes = Arrays.copyOfRange(random_stream_bytes, 0, random_stream_bytes.length / 2);
+        byte[] q_bytes = Arrays.copyOfRange(random_stream_bytes, random_stream_bytes.length / 2, random_stream_bytes.length);
+
+        // tornar o p e q como bignumbers
+        BigInteger p = new BigInteger(1, p_bytes).nextProbablePrime();
+        BigInteger q = new BigInteger(1, q_bytes).nextProbablePrime();
+
+        for(int i = 0; i < random_stream_bytes.length / 2; i++){
+            
+            p_bytes[i] = random_stream_bytes[i];
+        }
+        for(int i = 0; i < random_stream_bytes.length / 2; i++){
+            q_bytes[i] = random_stream_bytes[random_stream_bytes.length / 2 + i];
+        }
+
+        // Calcular o n
+        BigInteger n = p.multiply(q);
+
+        // Calcular o phi
+        BigInteger phi = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
+
+        // Calcular o d
+        BigInteger d = e.modInverse(phi);
+
+        // Criar o par de chaves RSA usando o n e o d
+        //RSAKeyGenParameterSpec spec = new RSAKeyGenParameterSpec(n.bitLength(), e);
+        RSAPublicKeySpec pub = new RSAPublicKeySpec(n, e);
+        RSAPrivateKeySpec priv = new RSAPrivateKeySpec(n, d);
+
+        //Inicialize the Key Factory
+        KeyFactory KeyFactory = java.security.KeyFactory.getInstance("RSA");
+
+        PublicKey publicKey = KeyFactory.generatePublic(pub);
+        PrivateKey privateKey = KeyFactory.generatePrivate(priv);
+
+        KeyPair keyPair = new KeyPair(publicKey, privateKey);
+
+
+        // Imprimir o par de chaves
+        System.out.println("Public Key: " + encodeToBase64(keyPair.getPublic().getEncoded()));
+        System.out.println("Private Key: " + encodeToBase64(keyPair.getPrivate().getEncoded()));
+        
+        // Retornar o par de chaves
+        return keyPair;
     }
 }
