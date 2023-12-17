@@ -10,12 +10,19 @@
 #include <openssl/evp.h>
 #include <openssl/pem.h>
 #include <openssl/rand.h>
-#include <openssl/rsa.h>
 #include <openssl/sha.h>
 
 // Constants
 #define RSA_KEY_SIZE 2048 // bits
 #define SEED_SIZE 32 // bytes
+
+// Struct for RSA key pair
+typedef struct rsa_key_pair
+{
+    BIGNUM *n;
+    BIGNUM *e;
+    BIGNUM *d;
+} RSA_KEY_PAIR;
 
 /**
  * @file rsa.c
@@ -137,28 +144,72 @@ void randgen(int size, const char *password, const char *confusion_string, int i
 }
 
 /**
+ * @brief This function encodes a byte array in base64
+ * 
+ * @param input  The byte array to be encoded
+ * @param length The length of the byte array
+ * @return char* The encoded byte array
+ */
+char *base64_encode(const unsigned char *input, int length)
+{
+    BIO *bmem, *base64;
+    BUF_MEM *buffer_pointer;
+
+    base64 = BIO_new(BIO_f_base64());
+    bmem = BIO_new(BIO_s_mem());
+    base64 = BIO_push(base64, bmem);
+    BIO_write(base64, input, length);
+    BIO_flush(base64);
+    BIO_get_mem_ptr(base64, &buffer_pointer);
+
+    char *buffer = (char *)malloc(buffer_pointer->length + 1);
+    memcpy(buffer, buffer_pointer->data, buffer_pointer->length);
+    buffer[buffer_pointer->length] = 0;
+
+    BIO_free_all(base64);
+
+    return buffer;
+}
+
+/**
  * @brief This function stores the RSA key pair in a PEM file.
  *
  * @param key_pair The RSA key pair to be stored
  * @param private_key_filename The name of the file to store the key pair
  * @param public_key_filename The name of the file to store the key pair
  */
-void storekey(RSA *key_pair, const char *private_key_filename, const char *public_key_filename)
+void storekey(RSA_KEY_PAIR key_pair, const char *private_key_filename, const char *public_key_filename)
 {
     FILE *private_key_file = fopen(private_key_filename, "wb");
     FILE *public_key_file = fopen(public_key_filename, "wb");
 
+    // Private key
     if (!private_key_file)
     {
         fprintf(stderr, "Error opening file\n");
         exit(1);
     }
 
-    if (PEM_write_RSAPrivateKey(private_key_file, key_pair, NULL, NULL, 0, NULL, NULL) != 1) // store private key
+    fprintf(private_key_file, "-----BEGIN PRIVATE KEY-----\n");
+
+    int private_key_data_len = BN_num_bytes(key_pair.n) + BN_num_bytes(key_pair.d);
+
+    unsigned char *private_key_data = (unsigned char *)malloc(private_key_data_len);
+    if (!private_key_data)
     {
-        fprintf(stderr, "Error writing private key\n");
+        fprintf(stderr, "Error allocating memory\n");
         exit(1);
     }
+
+    BN_bn2bin(key_pair.n, private_key_data);
+    BN_bn2bin(key_pair.d, private_key_data + BN_num_bytes(key_pair.n));
+
+    char *private_key_data_base64 = base64_encode(private_key_data, private_key_data_len);
+    fprintf(private_key_file, "%s", private_key_data_base64);
+
+    free(private_key_data);
+
+    fprintf(private_key_file, "-----END PRIVATE KEY-----\n");
 
     fclose(private_key_file);
 
@@ -168,11 +219,27 @@ void storekey(RSA *key_pair, const char *private_key_filename, const char *publi
         exit(1);
     }
 
-    if (PEM_write_RSAPublicKey(public_key_file, key_pair) != 1) // store public key
+    // Public key 
+    fprintf(public_key_file, "-----BEGIN PUBLIC KEY-----\n");
+
+    int public_key_data_len = BN_num_bytes(key_pair.n) + BN_num_bytes(key_pair.e);
+
+    unsigned char *public_key_data = (unsigned char *)malloc(public_key_data_len);
+    if (!public_key_data)
     {
-        fprintf(stderr, "Error writing public key\n");
+        fprintf(stderr, "Error allocating memory\n");
         exit(1);
     }
+
+    BN_bn2bin(key_pair.n, public_key_data);
+    BN_bn2bin(key_pair.e, public_key_data + BN_num_bytes(key_pair.n));
+
+    char *public_key_data_base64 = base64_encode(public_key_data, public_key_data_len);
+    fprintf(public_key_file, "%s", public_key_data_base64);
+
+    free(public_key_data);
+
+    fprintf(public_key_file, "-----END PUBLIC KEY-----\n");
 
     fclose(public_key_file);
 }
@@ -184,14 +251,9 @@ void storekey(RSA *key_pair, const char *private_key_filename, const char *publi
  *
  * @return The RSA key pair
  */
-RSA *rsagen(uint8_t *bytes)
+RSA_KEY_PAIR rsagen(uint8_t *bytes)
 {
-    RSA *key_pair = RSA_new();
-    if (!key_pair)
-    {
-        fprintf(stderr, "Error creating RSA key pair\n");
-        exit(EXIT_FAILURE);
-    }
+    RSA_KEY_PAIR key_pair = {NULL, NULL, NULL};
 
     BIGNUM *p = BN_new();
     BIGNUM *q = BN_new();
@@ -255,25 +317,14 @@ RSA *rsagen(uint8_t *bytes)
         goto cleanup;
     }
 
-    if (!RSA_set0_key(key_pair, n, e, d)) // set key pair
-    {
-        fprintf(stderr, "Error setting RSA key pair\n");
-        goto cleanup;
-    }
-
-    if (!RSA_generate_key_ex(key_pair, RSA_KEY_SIZE, e, NULL)) // generate key pair
-    {
-        fprintf(stderr, "Error generating RSA key pair\n");
-        goto cleanup;
-    }
+    key_pair.n = n;
+    key_pair.e = e;
+    key_pair.d = d;
 
 // Free variables
 cleanup:
     BN_free(p);
     BN_free(q);
-    BN_free(n);
-    BN_free(e);
-    BN_free(d);
 
     if (ctx)
         BN_CTX_free(ctx);
@@ -300,14 +351,10 @@ int main(int argc, char **argv)
     uint8_t bytes[RSA_KEY_SIZE / 8];
     randgen(RSA_KEY_SIZE / 8, password, confusion_string, iterations, bytes);
 
-    RSA *key_pair = rsagen(bytes); // generate key pair
-
-    printf("Public key:\n");
-    PEM_write_RSAPublicKey(stdout, key_pair);
+    // Generate RSA key pair
+    RSA_KEY_PAIR key_pair = rsagen(bytes);
 
     storekey(key_pair, "private_key.pem", "public_key.pem");
-
-    RSA_free(key_pair); // free key pair
 
     return 0;
 }
