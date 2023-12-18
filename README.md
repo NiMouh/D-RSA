@@ -21,8 +21,8 @@
 - Uma *confusion string* (seja lá o que isso for);
 - Contador de iterações;
 
-## Gerador de bytes pseudo-aleatórios (randgen)
-Gerar uma *key* de 256 bits a partir da palavra-passe, da *confusion string* e do contador de iterações.
+## Gerador de bytes pseudo-aleatórios (*randgen*)
+Criação de um PRBG a partir da palavra-passe, da *confusion string* e do contador de iterações.
 
 1. Computar uma *seed* para a palavra-passe, a *confusion string* e o contador de iterações, usando o método PBKDF2;
 2. Transformar a *confusion string* numa sequência de bytes do mesmo tamanho da palavra-passe HMAC (*confusion pattern*);
@@ -31,10 +31,12 @@ Gerar uma *key* de 256 bits a partir da palavra-passe, da *confusion string* e d
     1. Usar o PRNG para gerar um conjunto de bytes pseudo-aleatórios, até que o padrão da *confusion string* seja encontrado;
     2. Usar o PRNG para produzir a nova *seed* e usar essa *seed* para gerar os bytes pseudo-aleatórios.
 
+Para o PRNG utilizado foi o **SHA-256**, onde é dada uma *seed* e é gerado o hash dessa *seed*, a cada iteração é gerado um novo hash usando o hash anterior como *seed*.
 
-## Gerador de chaves RSA (rsagen)
+## Gerador de chaves RSA (*rsagen*)
 
 O par de chaves RSA será gerado através do gerador de bytes pseudo-aleatórios, da seguinte forma:
+
 1. Gerar um conjunto de bytes pseudo-aleatórios com o tamanho da chave RSA (em bytes);
 2. Será dividido o conjunto de bytes em dois conjuntos de bytes, sendo que o primeiro conjunto irá representar o nosso *p* e o segundo conjunto irá representar o nosso *q*, ambos em formato BIGNUMBER/BigInteger;
 3. Será verificado se os dois conjuntos de bytes são primos, caso não sejam, o seu valor será incrementado até que sejam primos;

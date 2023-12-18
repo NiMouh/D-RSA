@@ -27,7 +27,7 @@ typedef struct rsa_key_pair
 /**
  * @file rsa.c
  *
- * @brief This file contains the implementation of the RSA algorithm
+ * @brief This file contains the implementation of the D-RSA algorithm in C.
  *
  * @date 2023-11-16
  *
