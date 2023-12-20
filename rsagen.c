@@ -1,3 +1,14 @@
+/**
+ * @file rsa.c
+ * @brief This file contains the implementation of the D-RSA algorithm in C.
+ * @date 2023-11-16
+ * @author Ana Raquel Neves Vidal (118408)
+ * @author Simão Augusto Ferreira Andrade (118345)
+ *
+ * @copyright Copyright (c) 2023
+ *
+ */
+
 // Standard libraries
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,146 +17,25 @@
 
 // OpenSSL libraries
 #include <openssl/bn.h>
-#include <openssl/err.h>
-#include <openssl/evp.h>
 #include <openssl/pem.h>
-#include <openssl/rand.h>
-#include <openssl/sha.h>
 
 // Constants
-#define RSA_KEY_SIZE 2048 // bits
-#define SEED_SIZE 32 // bytes
+#define RSA_BYTE_KEY_SIZE 256
 
-// Struct for RSA key pair
+/**
+ * @struct RSA_KEY_PAIR
+ * @brief Represents an RSA key pair.
+ */
 typedef struct rsa_key_pair
 {
-    BIGNUM *n;
-    BIGNUM *e;
-    BIGNUM *d;
+    BIGNUM *n; // modulus
+    BIGNUM *e; // public exponent
+    BIGNUM *d; // private exponent
 } RSA_KEY_PAIR;
 
 /**
- * @file rsa.c
- *
- * @brief This file contains the implementation of the D-RSA algorithm in C.
- *
- * @date 2023-11-16
- *
- * @author Ana Raquel Neves Vidal (118408)
- * @author Simão Augusto Ferreira Andrade (118345)
- *
- */
-
-/**
- * @brief Function to check if A is a subarray of B
- *
- * @param A reference array A
- * @param a_size size of A
- * @param B reference array B
- * @param b_size size of B
- *
- * @return 1 if A is a subarray of B, 0 otherwise
- */
-int pattern_found(uint8_t A[], int a_size, uint8_t B[], int b_size)
-{
-    if (a_size > b_size)
-    {
-        fprintf(stderr,"A is longer than B\n");
-        return 0;
-    }
-
-    for (int i = 0; i <= b_size - a_size; i++)
-    {
-        int match = 1;
-        for (int j = 0; j < a_size; j++)
-        {
-            if (B[i + j] != A[j])
-            {
-                match = 0;
-                break; // mismatch
-            }
-        }
-
-        if (match)
-        {
-            return 1;
-        }
-    }
-
-    return 0; // A is not a subarray of B
-}
-
-/**
- * @brief Function to use the generator to produce a pseudo-random stream of bytes
- *
- * @param stream a pointer to an array where the bytes will be allocated
- * @param stream_size the size of the array
- * @param seed value that will start the generator
- */
-void generate_pseudo_random_stream(uint8_t *stream, int stream_size, uint8_t seed[SEED_SIZE])
-{
-    uint8_t hash_output[SHA256_DIGEST_LENGTH];
-
-    for (int index = 0; index < stream_size; index += SHA256_DIGEST_LENGTH)
-    {
-        SHA256(seed, SEED_SIZE, hash_output); // hash the seed
-
-        // Copy the hash output to the stream
-        int bytes_to_copy = (index + SHA256_DIGEST_LENGTH <= stream_size) ? SHA256_DIGEST_LENGTH : stream_size - index;
-        memcpy(stream + index, hash_output, bytes_to_copy);
-
-        memcpy(seed, hash_output, SHA256_DIGEST_LENGTH); // seed = hash_output
-    }
-}
-
-/**
- * @brief This function generates arbirtary a pseudo-random byte stream
- *
- * @param size The size of the byte stream to be generated
- * @param password The password to be used
- * @param confusion_string The confusion string to be used
- * @param iterations The number of iterations to be used
- * @param bytes The output byte array
- *
- */
-void randgen(int size, const char *password, const char *confusion_string, int iterations, uint8_t *bytes)
-{
-    uint8_t key_derivator[SEED_SIZE + strlen(confusion_string)];
-    uint8_t seed[SEED_SIZE];
-    uint8_t confusion_pattern[strlen(confusion_string)];
-
-    // generate the key derivator
-    if (PKCS5_PBKDF2_HMAC(password, strlen(password), (const unsigned char *)confusion_string, strlen(confusion_string), iterations, EVP_sha256(), SEED_SIZE + strlen(confusion_string), key_derivator) != 1)
-    {
-        fprintf(stderr, "Error generating key derivator\n");
-        exit(1);
-    }
-
-    // get the seed and the confusion pattern from the key derivator
-    memcpy(seed, key_derivator, SEED_SIZE);
-    memcpy(confusion_pattern, key_derivator + SEED_SIZE, strlen(confusion_string));
-
-    for (int iteration = 0; iteration < iterations; iteration++)
-    {
-        uint8_t temp_buffer[size];
-        while (1)
-        {
-            generate_pseudo_random_stream(temp_buffer, size, seed);
-
-            if (pattern_found(confusion_pattern, strlen(confusion_string), temp_buffer, size))
-            {
-                break;
-            }
-        }
-
-        memcpy(bytes, temp_buffer, size);
-        memcpy(seed, bytes + size - SEED_SIZE, SEED_SIZE);
-    }
-}
-
-/**
  * @brief This function encodes a byte array in base64
- * 
+ *
  * @param input  The byte array to be encoded
  * @param length The length of the byte array
  * @return char* The encoded byte array
@@ -172,7 +62,7 @@ char *base64_encode(const unsigned char *input, int length)
 }
 
 /**
- * @brief This function stores the RSA key pair in a PEM file.
+ * @brief This function stores the RSA key pair in a .PEM file.
  *
  * @param key_pair The RSA key pair to be stored
  * @param private_key_filename The name of the file to store the key pair
@@ -219,7 +109,7 @@ void storekey(RSA_KEY_PAIR key_pair, const char *private_key_filename, const cha
         exit(1);
     }
 
-    // Public key 
+    // Public key
     fprintf(public_key_file, "-----BEGIN PUBLIC KEY-----\n");
 
     int public_key_data_len = BN_num_bytes(key_pair.n) + BN_num_bytes(key_pair.e);
@@ -270,16 +160,15 @@ RSA_KEY_PAIR rsagen(uint8_t *bytes)
 
     // Divide the pseudo-random bytes in two halves
     uint8_t *bytes_p = bytes;
-    uint8_t *bytes_q = bytes + RSA_KEY_SIZE / 16;
+    uint8_t *bytes_q = bytes + RSA_BYTE_KEY_SIZE / 2;
 
-
-    if (!BN_bin2bn(bytes_p, RSA_KEY_SIZE / 16, p)) // p value
+    if (!BN_bin2bn(bytes_p, RSA_BYTE_KEY_SIZE / 2, p)) // p value
     {
         fprintf(stderr, "Error setting P value\n");
         goto cleanup;
     }
 
-    if (!BN_bin2bn(bytes_q, RSA_KEY_SIZE / 16, q)) // q value
+    if (!BN_bin2bn(bytes_q, RSA_BYTE_KEY_SIZE / 2, q)) // q value
     {
         fprintf(stderr, "Error setting Q value\n");
         goto cleanup;
@@ -354,25 +243,21 @@ cleanup:
     return key_pair;
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
-    if (argc != 4) // Usage => ./rsa <password> <confusion_string> <iterations>
+
+    // get the bytes from stdin
+    uint8_t bytes[RSA_BYTE_KEY_SIZE];
+    if (fread(bytes, sizeof(uint8_t), RSA_BYTE_KEY_SIZE, stdin) != RSA_BYTE_KEY_SIZE)
     {
-        fprintf(stderr, "Usage: ./rsa <password> <confusion_string> <iterations>\n");
+        fprintf(stderr, "Error reading bytes from stdin\n");
         exit(1);
     }
-
-    const char *password = argv[1];
-    const char *confusion_string = argv[2];
-    int iterations = atoi(argv[3]);
-
-    // Generate random bytes
-    uint8_t bytes[RSA_KEY_SIZE / 8];
-    randgen(RSA_KEY_SIZE / 8, password, confusion_string, iterations, bytes);
 
     // Generate RSA key pair
     RSA_KEY_PAIR key_pair = rsagen(bytes);
 
+    // Store key pair in PEM file
     storekey(key_pair, "private_key.pem", "public_key.pem");
 
     return 0;
