@@ -91,7 +91,16 @@ void generate_random_bytes(void *buffer, size_t size)
  */
 void setup_performance(int password_size_interval[], int salt_size_interval[], int iterations_interval[], int password_size_count, int salt_size_count, int iterations_count)
 {
-    printf("%-15s%-15s%-15s%-20s\n", "Password size", "Salt size", "Iterations", "Time spent (seconds)"); // header
+
+    // Create a CSV file with the results
+    FILE *results_file = fopen("performance.csv", "wb");
+    if (results_file == NULL)
+    {
+        perror("Error opening performance.csv");
+        exit(EXIT_FAILURE);
+    }
+
+    fprintf(results_file,"%s,%s,%s,%s\n", "password_size", "salt_size", "iterations", "time_seconds"); // header
 
     for (int password_index = 0; password_index < password_size_count; password_index++)
     {
@@ -112,10 +121,12 @@ void setup_performance(int password_size_interval[], int salt_size_interval[], i
 
                 double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
 
-                printf("%-15d%-15d%-15d%-20f\n", password_size_interval[password_index], salt_size_interval[salt_index], iterations_interval[iterations_index], time_spent); // line
+                fprintf(results_file,"%d,%d,%d,%f\n", password_size_interval[password_index], salt_size_interval[salt_index], iterations_interval[iterations_index], time_spent);
             }
         }
     }
+
+    fclose(results_file);
 }
 
 int main()
