@@ -68,7 +68,7 @@ char *base64_encode(const unsigned char *input, int length)
  * @param private_key_filename The name of the file to store the key pair
  * @param public_key_filename The name of the file to store the key pair
  */
-void storekey(RSA_KEY_PAIR key_pair, const char *private_key_filename, const char *public_key_filename)
+void storekeys(RSA_KEY_PAIR key_pair, const char *private_key_filename, const char *public_key_filename)
 {
     FILE *private_key_file = fopen(private_key_filename, "wb");
     FILE *public_key_file = fopen(public_key_filename, "wb");
@@ -77,7 +77,7 @@ void storekey(RSA_KEY_PAIR key_pair, const char *private_key_filename, const cha
     if (!private_key_file)
     {
         fprintf(stderr, "Error opening file\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     fprintf(private_key_file, "-----BEGIN PRIVATE KEY-----\n");
@@ -88,7 +88,7 @@ void storekey(RSA_KEY_PAIR key_pair, const char *private_key_filename, const cha
     if (!private_key_data)
     {
         fprintf(stderr, "Error allocating memory\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     BN_bn2bin(key_pair.n, private_key_data);
@@ -106,7 +106,7 @@ void storekey(RSA_KEY_PAIR key_pair, const char *private_key_filename, const cha
     if (!public_key_file)
     {
         fprintf(stderr, "Error opening file\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     // Public key
@@ -118,7 +118,7 @@ void storekey(RSA_KEY_PAIR key_pair, const char *private_key_filename, const cha
     if (!public_key_data)
     {
         fprintf(stderr, "Error allocating memory\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     BN_bn2bin(key_pair.n, public_key_data);
@@ -251,14 +251,14 @@ int main(void)
     if (fread(bytes, sizeof(uint8_t), RSA_BYTE_KEY_SIZE, stdin) != RSA_BYTE_KEY_SIZE)
     {
         fprintf(stderr, "Error reading bytes from stdin\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     // Generate RSA key pair
     RSA_KEY_PAIR key_pair = rsagen(bytes);
 
     // Store key pair in PEM file
-    storekey(key_pair, "private_key.pem", "public_key.pem");
+    storekeys(key_pair, "private_key.pem", "public_key.pem");
 
     return 0;
 }

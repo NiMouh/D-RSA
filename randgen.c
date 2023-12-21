@@ -84,6 +84,28 @@ void generate_pseudo_random_stream(uint8_t *stream, int stream_size, uint8_t see
     }
 }
 
+
+/**
+ * @brief This function generates the pbkdf2
+ * 
+ * @param password The password to be used
+ * @param salt The salt to be used
+ * @param iterations The number of iterations to be used
+ * @param key_derivator The output pbkdf2 
+ * 
+ * @return 1 if the pbkdf2 was generated successfully, 0 otherwise
+ */ 
+int pbkdf2(const char *password, const char *salt, int iterations, uint8_t *key_derivator)
+{
+    if (PKCS5_PBKDF2_HMAC(password, strlen(password), (const unsigned char *)salt, strlen(salt), iterations, EVP_sha256(), SEED_SIZE + strlen(salt), key_derivator) != 1)
+    {
+        fprintf(stderr, "Error generating key derivator\n");
+        return 0;
+    }
+
+    return 1;
+}
+
 /**
  * @brief This function generates arbirtary a pseudo-random byte stream
  *
@@ -96,16 +118,16 @@ void generate_pseudo_random_stream(uint8_t *stream, int stream_size, uint8_t see
  */
 void randgen(int size, const char *password, const char *confusion_string, int iterations, uint8_t *bytes)
 {
-    uint8_t key_derivator[SEED_SIZE + strlen(confusion_string)];
-    uint8_t seed[SEED_SIZE];
-    uint8_t confusion_pattern[strlen(confusion_string)];
 
-    // generate the key derivator
-    if (PKCS5_PBKDF2_HMAC(password, strlen(password), (const unsigned char *)confusion_string, strlen(confusion_string), iterations, EVP_sha256(), SEED_SIZE + strlen(confusion_string), key_derivator) != 1)
+    uint8_t key_derivator[SEED_SIZE + strlen(confusion_string)];
+    if (!pbkdf2(password, confusion_string, iterations, key_derivator))
     {
         fprintf(stderr, "Error generating key derivator\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
+
+    uint8_t seed[SEED_SIZE];
+    uint8_t confusion_pattern[strlen(confusion_string)];
 
     // get the seed and the confusion pattern from the key derivator
     memcpy(seed, key_derivator, SEED_SIZE);
@@ -134,12 +156,12 @@ int main(int argc, char *argv[])
     if (argc != 4) // ./randgen <password> <confusion_string> <iterations>
     {
         fprintf(stderr, "Usage: %s <password> <confusion_string> <iterations>\n", argv[0]);
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
-    const char *password = argv[2];
-    const char *confusion_string = argv[3];
-    int iterations = atoi(argv[4]);
+    const char *password = argv[1];
+    const char *confusion_string = argv[2];
+    int iterations = atoi(argv[3]);
 
     uint8_t bytes[BUFFER_SIZE];
 
