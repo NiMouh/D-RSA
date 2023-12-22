@@ -20,7 +20,7 @@
 #include <openssl/pem.h>
 
 // Constants
-#define RSA_BYTE_KEY_SIZE 256
+#define RSA_BYTE_KEYPAIR_SIZE 256
 
 /**
  * @struct RSA_KEY_PAIR
@@ -197,23 +197,23 @@ RSA_KEY_PAIR rsagen(uint8_t *bytes)
 
     // Divide the pseudo-random bytes in two halves
     uint8_t *bytes_p = bytes;
-    uint8_t *bytes_q = bytes + RSA_BYTE_KEY_SIZE / 2;
+    uint8_t *bytes_q = bytes + RSA_BYTE_KEYPAIR_SIZE / 2;
 
-    if (!BN_bin2bn(bytes_p, RSA_BYTE_KEY_SIZE / 2, p)) // p value
+    if (!BN_bin2bn(bytes_p, RSA_BYTE_KEYPAIR_SIZE / 2, p)) // p value
     {
         fprintf(stderr, "Error setting P value\n");
         goto cleanup;
     }
 
-    if (!BN_bin2bn(bytes_q, RSA_BYTE_KEY_SIZE / 2, q)) // q value
+    if (!BN_bin2bn(bytes_q, RSA_BYTE_KEYPAIR_SIZE / 2, q)) // q value
     {
         fprintf(stderr, "Error setting Q value\n");
         goto cleanup;
     }
 
-    while (!BN_is_prime_ex(p, BN_prime_checks, ctx, NULL))
+    while (!BN_is_prime_ex(p, BN_prime_checks, ctx, NULL)) // p is not prime
     {
-        if (!BN_add_word(p, 1))
+        if (!BN_add_word(p, 1)) // p = p + 1
         {
             fprintf(stderr, "Error incrementing P\n");
             goto cleanup;
@@ -222,12 +222,14 @@ RSA_KEY_PAIR rsagen(uint8_t *bytes)
 
     while (!BN_is_prime_ex(q, BN_prime_checks, ctx, NULL) || BN_cmp(p, q) == 0)
     {
-        if (!BN_add_word(q, 1))
+        if (!BN_add_word(q, 1)) // q = q + 1
         {
             fprintf(stderr, "Error incrementing Q\n");
             goto cleanup;
         }
     }
+
+    printf("Primos foram gerados com sucesso!\n");
 
     if (!BN_mul(n, p, q, ctx)) // n = p * q
     {
@@ -287,8 +289,8 @@ int main(void)
 {
 
     // get the bytes from stdin
-    uint8_t bytes[RSA_BYTE_KEY_SIZE];
-    if (fread(bytes, sizeof(uint8_t), RSA_BYTE_KEY_SIZE, stdin) != RSA_BYTE_KEY_SIZE)
+    uint8_t bytes[RSA_BYTE_KEYPAIR_SIZE];
+    if (fread(bytes, sizeof(uint8_t), RSA_BYTE_KEYPAIR_SIZE, stdin) != RSA_BYTE_KEYPAIR_SIZE)
     {
         fprintf(stderr, "Error reading bytes from stdin\n");
         exit(EXIT_FAILURE);
