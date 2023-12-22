@@ -73,16 +73,27 @@ void storekeys(RSA_KEY_PAIR key_pair, const char *private_key_filename, const ch
     FILE *private_key_file = fopen(private_key_filename, "wb");
     FILE *public_key_file = fopen(public_key_filename, "wb");
 
-    // Private key
+    // Starting byte declaration
+    char starting_byte = 0x30;
+
+    // Separation byte declaration
+    char separation_byte = 0x02;
+
     if (!private_key_file)
     {
         fprintf(stderr, "Error opening file\n");
         exit(EXIT_FAILURE);
     }
 
+    /* BEGINING OF PRIVATE KEY */
     fprintf(private_key_file, "-----BEGIN PRIVATE KEY-----\n");
 
-    int private_key_data_len = BN_num_bytes(key_pair.n) + BN_num_bytes(key_pair.d);
+    // Use DER format to create the private key
+
+    int n_size = BN_num_bytes(key_pair.n);
+    int d_size = BN_num_bytes(key_pair.d);
+
+    int private_key_data_len = 6 + n_size + d_size;
 
     unsigned char *private_key_data = (unsigned char *)malloc(private_key_data_len);
     if (!private_key_data)
@@ -91,8 +102,19 @@ void storekeys(RSA_KEY_PAIR key_pair, const char *private_key_filename, const ch
         exit(EXIT_FAILURE);
     }
 
-    BN_bn2bin(key_pair.n, private_key_data);
-    BN_bn2bin(key_pair.d, private_key_data + BN_num_bytes(key_pair.n));
+    private_key_data[0] = starting_byte;
+    private_key_data[1] = n_size + d_size;
+    private_key_data[2] = separation_byte;
+    private_key_data[3] = n_size;
+
+    // Set the N
+    BN_bn2bin(key_pair.n, private_key_data + 4);
+
+    private_key_data[4 + n_size] = separation_byte;
+    private_key_data[5 + n_size] = d_size;
+
+    // Set the D
+    BN_bn2bin(key_pair.d, private_key_data + 6 + n_size);
 
     char *private_key_data_base64 = base64_encode(private_key_data, private_key_data_len);
     fprintf(private_key_file, "%s", private_key_data_base64);
@@ -109,11 +131,15 @@ void storekeys(RSA_KEY_PAIR key_pair, const char *private_key_filename, const ch
         exit(EXIT_FAILURE);
     }
 
-    // Public key
+    /* BEGINING OF PUBLIC KEY */
     fprintf(public_key_file, "-----BEGIN PUBLIC KEY-----\n");
 
-    int public_key_data_len = BN_num_bytes(key_pair.n) + BN_num_bytes(key_pair.e);
+    // User DER format to create the public key
+    int e_size = BN_num_bytes(key_pair.e);
 
+    int public_key_data_len = 6 + n_size + e_size; // 6 = 1 starting byte + 2 separation bytes + 3 size bytes
+
+    // Allocate memory for the public key
     unsigned char *public_key_data = (unsigned char *)malloc(public_key_data_len);
     if (!public_key_data)
     {
@@ -121,8 +147,19 @@ void storekeys(RSA_KEY_PAIR key_pair, const char *private_key_filename, const ch
         exit(EXIT_FAILURE);
     }
 
-    BN_bn2bin(key_pair.n, public_key_data);
-    BN_bn2bin(key_pair.e, public_key_data + BN_num_bytes(key_pair.n));
+    public_key_data[0] = starting_byte;
+    public_key_data[1] = n_size + e_size;
+    public_key_data[2] = separation_byte;
+    public_key_data[3] = n_size;
+
+    // Set the N
+    BN_bn2bin(key_pair.n, public_key_data + 4);
+
+    public_key_data[4 + n_size] = separation_byte;
+    public_key_data[5 + n_size] = e_size;
+
+    // Set the e
+    BN_bn2bin(key_pair.e, public_key_data + 6 + n_size);
 
     char *public_key_data_base64 = base64_encode(public_key_data, public_key_data_len);
     fprintf(public_key_file, "%s", public_key_data_base64);
@@ -174,14 +211,17 @@ RSA_KEY_PAIR rsagen(uint8_t *bytes)
         goto cleanup;
     }
 
-    while (!BN_is_prime_ex(p, BN_prime_checks, ctx, NULL) || !BN_is_prime_ex(q, BN_prime_checks, ctx, NULL) || BN_cmp(p, q) == 0)
+    while (!BN_is_prime_ex(p, BN_prime_checks, ctx, NULL))
     {
         if (!BN_add_word(p, 1))
         {
             fprintf(stderr, "Error incrementing P\n");
             goto cleanup;
         }
+    }
 
+    while (!BN_is_prime_ex(q, BN_prime_checks, ctx, NULL) || BN_cmp(p, q) == 0)
+    {
         if (!BN_add_word(q, 1))
         {
             fprintf(stderr, "Error incrementing Q\n");
