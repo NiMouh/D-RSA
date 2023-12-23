@@ -132,9 +132,9 @@ void setup_performance(int password_size_interval[], int salt_size_interval[], i
 int main()
 {
     // values to be tested
-    int password_sizes[] = {5, 50, 200};
-    int salt_sizes[] = {5, 50, 200};
-    int iteration_counts[] = {1, 10, 100};
+    int password_sizes[] = {10000, 100000, 200000};
+    int salt_sizes[] = {5000, 50000, 100000};
+    int iteration_counts[] = {1000, 10000, 100000};
 
     int password_size_count = sizeof(password_sizes) / sizeof(password_sizes[0]);
     int salt_size_count = sizeof(salt_sizes) / sizeof(salt_sizes[0]);

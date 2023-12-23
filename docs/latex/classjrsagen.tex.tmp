@@ -1,0 +1,188 @@
+\hypertarget{classjrsagen}{}\doxysection{jrsagen Class Reference}
+\label{classjrsagen}\index{jrsagen@{jrsagen}}
+
+
+Collaboration diagram for jrsagen\+:
+% FIG 0
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \mbox{\hyperlink{classjrsagen_a58101b42c0cd4e0825df6d29f893bcf8}{main}} (String\mbox{[}$\,$\mbox{]} args)  throws Exception 
+\item 
+static Big\+Integer\mbox{[}$\,$\mbox{]}\mbox{[}$\,$\mbox{]} \mbox{\hyperlink{classjrsagen_a78c7bc6f9fd9cde8e146ca73adb85cc6}{rsagen}} (byte\mbox{[}$\,$\mbox{]} random\+\_\+stream\+\_\+bytes)  throws Exception 
+\begin{DoxyCompactList}\small\item\em \+: Geração de chaves RSA \end{DoxyCompactList}\item 
+static String \mbox{\hyperlink{classjrsagen_a4105175b5f9ba49c7b2ecf5071403622}{bytes\+To\+Hex}} (byte\mbox{[}$\,$\mbox{]} bytes)
+\begin{DoxyCompactList}\small\item\em \+: Codificar um array de bytes para base64 \end{DoxyCompactList}\item 
+static byte\mbox{[}$\,$\mbox{]} \mbox{\hyperlink{classjrsagen_ae79a76d3ebf6fe0cf649469dfac5b587}{generate\+DEREncoding\+Public}} (Big\+Integer N, Big\+Integer e)
+\begin{DoxyCompactList}\small\item\em \+: Geração de DER encoding para a chave pública \end{DoxyCompactList}\item 
+static byte\mbox{[}$\,$\mbox{]} \mbox{\hyperlink{classjrsagen_a94a5d6f19cabe10e268a37973e17dbd7}{generate\+DEREncoding\+Private}} (Big\+Integer n, Big\+Integer d)
+\begin{DoxyCompactList}\small\item\em \+: Geração de DER encoding para a chave privada \end{DoxyCompactList}\item 
+static byte\mbox{[}$\,$\mbox{]} \mbox{\hyperlink{classjrsagen_a136e1c848acd2a3ddc1ce38da9a948e7}{remove\+Sign\+Byte}} (byte\mbox{[}$\,$\mbox{]} bytes)
+\begin{DoxyCompactList}\small\item\em \+: Codificar um array de bytes para base64 \end{DoxyCompactList}\item 
+static void \mbox{\hyperlink{classjrsagen_a5c15b92af5ef0b6924b9ed266399d14f}{store\+Key\+Pair}} (Big\+Integer\mbox{[}$\,$\mbox{]}\mbox{[}$\,$\mbox{]} key\+Pair)  throws IOException 
+\begin{DoxyCompactList}\small\item\em \+: Codificar um array de bytes para base64 \end{DoxyCompactList}\item 
+static String \mbox{\hyperlink{classjrsagen_a2adaaae472f00e7fc33ff1286608b911}{encode\+To\+Base64}} (byte\mbox{[}$\,$\mbox{]} data)
+\begin{DoxyCompactList}\small\item\em \+: Codificar um array de bytes para base64 \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classjrsagen_a1bdb19dd17416f8866a6128bfc000fba}\label{classjrsagen_a1bdb19dd17416f8866a6128bfc000fba}} 
+static final int {\bfseries PRIME\+\_\+\+SIZE} = 256
+\item 
+\mbox{\Hypertarget{classjrsagen_a37566632c03238498668c270986809ed}\label{classjrsagen_a37566632c03238498668c270986809ed}} 
+static final Big\+Integer {\bfseries e} = Big\+Integer.\+value\+Of(65537)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classjrsagen_a4105175b5f9ba49c7b2ecf5071403622}\label{classjrsagen_a4105175b5f9ba49c7b2ecf5071403622}} 
+\index{jrsagen@{jrsagen}!bytesToHex@{bytesToHex}}
+\index{bytesToHex@{bytesToHex}!jrsagen@{jrsagen}}
+\doxysubsubsection{\texorpdfstring{bytesToHex()}{bytesToHex()}}
+{\footnotesize\ttfamily static String jrsagen.\+bytes\+To\+Hex (\begin{DoxyParamCaption}\item[{byte\mbox{[}$\,$\mbox{]}}]{bytes }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+\+: Codificar um array de bytes para base64 
+
+
+\begin{DoxyParams}{Parameters}
+{\em } & bytes -\/ Array de bytes a codificar\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\+: base64 -\/ Array de bytes codificado em base64 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classjrsagen_a2adaaae472f00e7fc33ff1286608b911}\label{classjrsagen_a2adaaae472f00e7fc33ff1286608b911}} 
+\index{jrsagen@{jrsagen}!encodeToBase64@{encodeToBase64}}
+\index{encodeToBase64@{encodeToBase64}!jrsagen@{jrsagen}}
+\doxysubsubsection{\texorpdfstring{encodeToBase64()}{encodeToBase64()}}
+{\footnotesize\ttfamily static String jrsagen.\+encode\+To\+Base64 (\begin{DoxyParamCaption}\item[{byte\mbox{[}$\,$\mbox{]}}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+\+: Codificar um array de bytes para base64 
+
+
+\begin{DoxyParams}{Parameters}
+{\em } & data -\/ Array de bytes a codificar\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\+: base64 -\/ Array de bytes codificado em base64 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classjrsagen_a94a5d6f19cabe10e268a37973e17dbd7}\label{classjrsagen_a94a5d6f19cabe10e268a37973e17dbd7}} 
+\index{jrsagen@{jrsagen}!generateDEREncodingPrivate@{generateDEREncodingPrivate}}
+\index{generateDEREncodingPrivate@{generateDEREncodingPrivate}!jrsagen@{jrsagen}}
+\doxysubsubsection{\texorpdfstring{generateDEREncodingPrivate()}{generateDEREncodingPrivate()}}
+{\footnotesize\ttfamily static byte \mbox{[}$\,$\mbox{]} jrsagen.\+generate\+DEREncoding\+Private (\begin{DoxyParamCaption}\item[{Big\+Integer}]{n,  }\item[{Big\+Integer}]{d }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+\+: Geração de DER encoding para a chave privada 
+
+
+\begin{DoxyParams}{Parameters}
+{\em } & N = p$\ast$q -\/ n \\
+\hline
+{\em } & d e.\+mod\+Inverse(phi) -\/ d\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\+: der\+Encoding -\/ DER encoding para a chave privada 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classjrsagen_ae79a76d3ebf6fe0cf649469dfac5b587}\label{classjrsagen_ae79a76d3ebf6fe0cf649469dfac5b587}} 
+\index{jrsagen@{jrsagen}!generateDEREncodingPublic@{generateDEREncodingPublic}}
+\index{generateDEREncodingPublic@{generateDEREncodingPublic}!jrsagen@{jrsagen}}
+\doxysubsubsection{\texorpdfstring{generateDEREncodingPublic()}{generateDEREncodingPublic()}}
+{\footnotesize\ttfamily static byte \mbox{[}$\,$\mbox{]} jrsagen.\+generate\+DEREncoding\+Public (\begin{DoxyParamCaption}\item[{Big\+Integer}]{N,  }\item[{Big\+Integer}]{e }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+\+: Geração de DER encoding para a chave pública 
+
+
+\begin{DoxyParams}{Parameters}
+{\em } & N -\/ n \\
+\hline
+{\em } & e -\/ e\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\+: der\+Encoding -\/ DER encoding para a chave pública 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classjrsagen_a58101b42c0cd4e0825df6d29f893bcf8}\label{classjrsagen_a58101b42c0cd4e0825df6d29f893bcf8}} 
+\index{jrsagen@{jrsagen}!main@{main}}
+\index{main@{main}!jrsagen@{jrsagen}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily static void jrsagen.\+main (\begin{DoxyParamCaption}\item[{String\mbox{[}$\,$\mbox{]}}]{args }\end{DoxyParamCaption}) throws Exception\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+\begin{DoxyParams}{Parameters}
+{\em args} & \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em Exception} & \\
+\hline
+\end{DoxyExceptions}
+\mbox{\Hypertarget{classjrsagen_a136e1c848acd2a3ddc1ce38da9a948e7}\label{classjrsagen_a136e1c848acd2a3ddc1ce38da9a948e7}} 
+\index{jrsagen@{jrsagen}!removeSignByte@{removeSignByte}}
+\index{removeSignByte@{removeSignByte}!jrsagen@{jrsagen}}
+\doxysubsubsection{\texorpdfstring{removeSignByte()}{removeSignByte()}}
+{\footnotesize\ttfamily static byte \mbox{[}$\,$\mbox{]} jrsagen.\+remove\+Sign\+Byte (\begin{DoxyParamCaption}\item[{byte\mbox{[}$\,$\mbox{]}}]{bytes }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+\+: Codificar um array de bytes para base64 
+
+
+\begin{DoxyParams}{Parameters}
+{\em } & bytes -\/ Array de bytes a codificar\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\+: base64 -\/ Array de bytes codificado em base64 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classjrsagen_a78c7bc6f9fd9cde8e146ca73adb85cc6}\label{classjrsagen_a78c7bc6f9fd9cde8e146ca73adb85cc6}} 
+\index{jrsagen@{jrsagen}!rsagen@{rsagen}}
+\index{rsagen@{rsagen}!jrsagen@{jrsagen}}
+\doxysubsubsection{\texorpdfstring{rsagen()}{rsagen()}}
+{\footnotesize\ttfamily static Big\+Integer \mbox{[}$\,$\mbox{]}\mbox{[}$\,$\mbox{]} jrsagen.\+rsagen (\begin{DoxyParamCaption}\item[{byte\mbox{[}$\,$\mbox{]}}]{random\+\_\+stream\+\_\+bytes }\end{DoxyParamCaption}) throws Exception\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+\+: Geração de chaves RSA 
+
+
+\begin{DoxyParams}{Parameters}
+{\em } & random\+\_\+stream\+\_\+bytes -\/ Bytes aleatórios gerados\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\+: key\+Pair -\/ Chave pública e privada 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classjrsagen_a5c15b92af5ef0b6924b9ed266399d14f}\label{classjrsagen_a5c15b92af5ef0b6924b9ed266399d14f}} 
+\index{jrsagen@{jrsagen}!storeKeyPair@{storeKeyPair}}
+\index{storeKeyPair@{storeKeyPair}!jrsagen@{jrsagen}}
+\doxysubsubsection{\texorpdfstring{storeKeyPair()}{storeKeyPair()}}
+{\footnotesize\ttfamily static void jrsagen.\+store\+Key\+Pair (\begin{DoxyParamCaption}\item[{Big\+Integer}]{key\+Pair\mbox{[}$\,$\mbox{]}\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption}) throws IOException\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+\+: Codificar um array de bytes para base64 
+
+
+\begin{DoxyParams}{Parameters}
+{\em } & bytes -\/ Array de bytes a codificar\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\+: base64 -\/ Array de bytes codificado em base64 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{jrsagen_8java}{jrsagen.\+java}}\end{DoxyCompactItemize}

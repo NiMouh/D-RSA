@@ -1,5 +1,5 @@
 /**
- * @file rsa.c
+ * @file rsagen.c
  * @brief This file contains the implementation of the D-RSA algorithm in C.
  * @date 2023-11-16
  * @author Ana Raquel Neves Vidal (118408)
@@ -228,8 +228,6 @@ RSA_KEY_PAIR rsagen(uint8_t *bytes)
             goto cleanup;
         }
     }
-
-    printf("Primos foram gerados com sucesso!\n");
 
     if (!BN_mul(n, p, q, ctx)) // n = p * q
     {

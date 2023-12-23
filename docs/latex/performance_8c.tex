@@ -1,0 +1,117 @@
+\hypertarget{performance_8c}{}\doxysection{performance.\+c File Reference}
+\label{performance_8c}\index{performance.c@{performance.c}}
+
+
+This file contains the performance tests of the setup of the D-\/\+RSA in C.  
+
+
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$time.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/evp.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/sha.\+h$>$}\newline
+Include dependency graph for performance.\+c\+:
+% FIG 0
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{performance_8c_ae644779154eb97135768f1d42506cc2e}\label{performance_8c_ae644779154eb97135768f1d42506cc2e}} 
+\#define {\bfseries SEED\+\_\+\+SIZE}~32
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{performance_8c_a08ed19aba76f68859ebee21344682a20}{pbkdf2}} (const char password\mbox{[}$\,$\mbox{]}, const char salt\mbox{[}$\,$\mbox{]}, int iterations, uint8\+\_\+t key\+\_\+derivator\mbox{[}$\,$\mbox{]})
+\begin{DoxyCompactList}\small\item\em This function generates the pbkdf2. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{performance_8c_a81c4f8246668f2e3bf969e4753e459ba}{generate\+\_\+random\+\_\+bytes}} (void $\ast$buffer, size\+\_\+t size)
+\begin{DoxyCompactList}\small\item\em Function to use the generator to produce a pseudo-\/random stream of bytes. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{performance_8c_a5bfa0ce79f8b7179803a51a9da42cf04}{setup\+\_\+performance}} (int password\+\_\+size\+\_\+interval\mbox{[}$\,$\mbox{]}, int salt\+\_\+size\+\_\+interval\mbox{[}$\,$\mbox{]}, int iterations\+\_\+interval\mbox{[}$\,$\mbox{]}, int password\+\_\+size\+\_\+count, int salt\+\_\+size\+\_\+count, int iterations\+\_\+count)
+\begin{DoxyCompactList}\small\item\em this function is used to test the speed on the pbkdf2 function (consider using the /dev/urandom to generate random bytes to test) and send the time results to stdout \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{performance_8c_ae66f6b31b5ad750f1fe042a706a4e3d4}\label{performance_8c_ae66f6b31b5ad750f1fe042a706a4e3d4}} 
+int {\bfseries main} ()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This file contains the performance tests of the setup of the D-\/\+RSA in C. 
+
+\begin{DoxyAuthor}{Author}
+Ana Raquel Neves Vidal (118408) 
+
+Simão Augusto Ferreira Andrade (118345) 
+\end{DoxyAuthor}
+\begin{DoxyDate}{Date}
+2023-\/12-\/21
+\end{DoxyDate}
+\begin{DoxyCopyright}{Copyright}
+Copyright (c) 2023 
+\end{DoxyCopyright}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{performance_8c_a81c4f8246668f2e3bf969e4753e459ba}\label{performance_8c_a81c4f8246668f2e3bf969e4753e459ba}} 
+\index{performance.c@{performance.c}!generate\_random\_bytes@{generate\_random\_bytes}}
+\index{generate\_random\_bytes@{generate\_random\_bytes}!performance.c@{performance.c}}
+\doxysubsubsection{\texorpdfstring{generate\_random\_bytes()}{generate\_random\_bytes()}}
+{\footnotesize\ttfamily void generate\+\_\+random\+\_\+bytes (\begin{DoxyParamCaption}\item[{void $\ast$}]{buffer,  }\item[{size\+\_\+t}]{size }\end{DoxyParamCaption})}
+
+
+
+Function to use the generator to produce a pseudo-\/random stream of bytes. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em buffer} & a pointer to an array where the bytes will be allocated \\
+\hline
+{\em size} & the size of the array \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{performance_8c_a08ed19aba76f68859ebee21344682a20}\label{performance_8c_a08ed19aba76f68859ebee21344682a20}} 
+\index{performance.c@{performance.c}!pbkdf2@{pbkdf2}}
+\index{pbkdf2@{pbkdf2}!performance.c@{performance.c}}
+\doxysubsubsection{\texorpdfstring{pbkdf2()}{pbkdf2()}}
+{\footnotesize\ttfamily int pbkdf2 (\begin{DoxyParamCaption}\item[{const char}]{password\mbox{[}$\,$\mbox{]},  }\item[{const char}]{salt\mbox{[}$\,$\mbox{]},  }\item[{int}]{iterations,  }\item[{uint8\+\_\+t}]{key\+\_\+derivator\mbox{[}$\,$\mbox{]} }\end{DoxyParamCaption})}
+
+
+
+This function generates the pbkdf2. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em password} & The password to be used \\
+\hline
+{\em salt} & The salt to be used \\
+\hline
+{\em iterations} & The number of iterations to be used \\
+\hline
+{\em key\+\_\+derivator} & The output pbkdf2\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+1 if the pbkdf2 was generated successfully, 0 otherwise 
+\end{DoxyReturn}
+\mbox{\Hypertarget{performance_8c_a5bfa0ce79f8b7179803a51a9da42cf04}\label{performance_8c_a5bfa0ce79f8b7179803a51a9da42cf04}} 
+\index{performance.c@{performance.c}!setup\_performance@{setup\_performance}}
+\index{setup\_performance@{setup\_performance}!performance.c@{performance.c}}
+\doxysubsubsection{\texorpdfstring{setup\_performance()}{setup\_performance()}}
+{\footnotesize\ttfamily void setup\+\_\+performance (\begin{DoxyParamCaption}\item[{int}]{password\+\_\+size\+\_\+interval\mbox{[}$\,$\mbox{]},  }\item[{int}]{salt\+\_\+size\+\_\+interval\mbox{[}$\,$\mbox{]},  }\item[{int}]{iterations\+\_\+interval\mbox{[}$\,$\mbox{]},  }\item[{int}]{password\+\_\+size\+\_\+count,  }\item[{int}]{salt\+\_\+size\+\_\+count,  }\item[{int}]{iterations\+\_\+count }\end{DoxyParamCaption})}
+
+
+
+this function is used to test the speed on the pbkdf2 function (consider using the /dev/urandom to generate random bytes to test) and send the time results to stdout 
+
+
+\begin{DoxyParams}{Parameters}
+{\em password\+\_\+size\+\_\+interval} & An array with the password sizes to be tested \\
+\hline
+{\em salt\+\_\+size\+\_\+interval} & An array with the salt sizes to be tested \\
+\hline
+{\em iterations\+\_\+interval} & An array with the number of iterations to be tested \\
+\hline
+{\em password\+\_\+size\+\_\+count} & The number of password sizes to be tested \\
+\hline
+{\em salt\+\_\+size\+\_\+count} & The number of salt sizes to be tested \\
+\hline
+{\em iterations\+\_\+count} & The number of iterations to be tested \\
+\hline
+\end{DoxyParams}

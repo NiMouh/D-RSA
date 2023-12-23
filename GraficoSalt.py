@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Substitua 'caminho/do/seu/arquivo.csv' pelo caminho real do seu arquivo
-file_path = r'C:\Users\Utilizador\Desktop\Universidade\Mestrado\1ano\1semestre\Criptografia Aplicada\SecondProject\performance.csv'
+file_path = r'performance.csv'
 
 # Lendo o arquivo usando o método read_csv do Pandas
 data = pd.read_csv(file_path)
@@ -21,4 +21,4 @@ plt.legend(title='Número de Iterações')
 plt.grid(axis='y')
 plt.tight_layout()
 
-plt.show()
+plt.savefig('images/graficoSalt.png')

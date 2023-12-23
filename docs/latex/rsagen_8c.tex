@@ -1,0 +1,120 @@
+\hypertarget{rsagen_8c}{}\doxysection{rsagen.\+c File Reference}
+\label{rsagen_8c}\index{rsagen.c@{rsagen.c}}
+
+
+This file contains the implementation of the D-\/\+RSA algorithm in C.  
+
+
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/bn.\+h$>$}\newline
+{\ttfamily \#include $<$openssl/pem.\+h$>$}\newline
+Include dependency graph for rsagen.\+c\+:
+% FIG 0
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structrsa__key__pair}{rsa\+\_\+key\+\_\+pair}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{rsagen_8c_a65de4fe1fab3c28dc8d63ad68072295c}\label{rsagen_8c_a65de4fe1fab3c28dc8d63ad68072295c}} 
+\#define {\bfseries RSA\+\_\+\+BYTE\+\_\+\+KEYPAIR\+\_\+\+SIZE}~256
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{rsagen_8c_a46415f02af21e2920f3d320427f6bdb0}\label{rsagen_8c_a46415f02af21e2920f3d320427f6bdb0}} 
+typedef struct \mbox{\hyperlink{structrsa__key__pair}{rsa\+\_\+key\+\_\+pair}} {\bfseries RSA\+\_\+\+KEY\+\_\+\+PAIR}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+char $\ast$ \mbox{\hyperlink{rsagen_8c_a96b4b572afaac9b97df345f2ad6bc7cc}{base64\+\_\+encode}} (const unsigned char $\ast$input, int length)
+\begin{DoxyCompactList}\small\item\em This function encodes a byte array in base64. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{rsagen_8c_a09015994aa5a77120828f5655b480b50}{storekeys}} (\mbox{\hyperlink{structRSA__KEY__PAIR}{RSA\+\_\+\+KEY\+\_\+\+PAIR}} key\+\_\+pair, const char $\ast$private\+\_\+key\+\_\+filename, const char $\ast$public\+\_\+key\+\_\+filename)
+\begin{DoxyCompactList}\small\item\em This function stores the RSA key pair in a .PEM file. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structRSA__KEY__PAIR}{RSA\+\_\+\+KEY\+\_\+\+PAIR}} \mbox{\hyperlink{rsagen_8c_a4105b8d60c61fa892ec8d0fc115f0878}{rsagen}} (uint8\+\_\+t $\ast$bytes)
+\begin{DoxyCompactList}\small\item\em This function generates an RSA key pair from a Pseudo-\/\+Random Byte Stream. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{rsagen_8c_a840291bc02cba5474a4cb46a9b9566fe}\label{rsagen_8c_a840291bc02cba5474a4cb46a9b9566fe}} 
+int {\bfseries main} (void)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+This file contains the implementation of the D-\/\+RSA algorithm in C. 
+
+\begin{DoxyDate}{Date}
+2023-\/11-\/16 
+\end{DoxyDate}
+\begin{DoxyAuthor}{Author}
+Ana Raquel Neves Vidal (118408) 
+
+Simão Augusto Ferreira Andrade (118345)
+\end{DoxyAuthor}
+\begin{DoxyCopyright}{Copyright}
+Copyright (c) 2023 
+\end{DoxyCopyright}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{rsagen_8c_a96b4b572afaac9b97df345f2ad6bc7cc}\label{rsagen_8c_a96b4b572afaac9b97df345f2ad6bc7cc}} 
+\index{rsagen.c@{rsagen.c}!base64\_encode@{base64\_encode}}
+\index{base64\_encode@{base64\_encode}!rsagen.c@{rsagen.c}}
+\doxysubsubsection{\texorpdfstring{base64\_encode()}{base64\_encode()}}
+{\footnotesize\ttfamily char$\ast$ base64\+\_\+encode (\begin{DoxyParamCaption}\item[{const unsigned char $\ast$}]{input,  }\item[{int}]{length }\end{DoxyParamCaption})}
+
+
+
+This function encodes a byte array in base64. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em input} & The byte array to be encoded \\
+\hline
+{\em length} & The length of the byte array \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+char$\ast$ The encoded byte array 
+\end{DoxyReturn}
+\mbox{\Hypertarget{rsagen_8c_a4105b8d60c61fa892ec8d0fc115f0878}\label{rsagen_8c_a4105b8d60c61fa892ec8d0fc115f0878}} 
+\index{rsagen.c@{rsagen.c}!rsagen@{rsagen}}
+\index{rsagen@{rsagen}!rsagen.c@{rsagen.c}}
+\doxysubsubsection{\texorpdfstring{rsagen()}{rsagen()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structRSA__KEY__PAIR}{RSA\+\_\+\+KEY\+\_\+\+PAIR}} rsagen (\begin{DoxyParamCaption}\item[{uint8\+\_\+t $\ast$}]{bytes }\end{DoxyParamCaption})}
+
+
+
+This function generates an RSA key pair from a Pseudo-\/\+Random Byte Stream. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em bytes} & The pseudo-\/random byte array that will be used to generate the key pair\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The RSA key pair 
+\end{DoxyReturn}
+\mbox{\Hypertarget{rsagen_8c_a09015994aa5a77120828f5655b480b50}\label{rsagen_8c_a09015994aa5a77120828f5655b480b50}} 
+\index{rsagen.c@{rsagen.c}!storekeys@{storekeys}}
+\index{storekeys@{storekeys}!rsagen.c@{rsagen.c}}
+\doxysubsubsection{\texorpdfstring{storekeys()}{storekeys()}}
+{\footnotesize\ttfamily void storekeys (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structRSA__KEY__PAIR}{RSA\+\_\+\+KEY\+\_\+\+PAIR}}}]{key\+\_\+pair,  }\item[{const char $\ast$}]{private\+\_\+key\+\_\+filename,  }\item[{const char $\ast$}]{public\+\_\+key\+\_\+filename }\end{DoxyParamCaption})}
+
+
+
+This function stores the RSA key pair in a .PEM file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em key\+\_\+pair} & The RSA key pair to be stored \\
+\hline
+{\em private\+\_\+key\+\_\+filename} & The name of the file to store the key pair \\
+\hline
+{\em public\+\_\+key\+\_\+filename} & The name of the file to store the key pair \\
+\hline
+\end{DoxyParams}

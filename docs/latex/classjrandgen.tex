@@ -1,0 +1,151 @@
+\hypertarget{classjrandgen}{}\doxysection{jrandgen Class Reference}
+\label{classjrandgen}\index{jrandgen@{jrandgen}}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classjrandgen_a37fea9592108ceeede9c32d1be683b68}\label{classjrandgen_a37fea9592108ceeede9c32d1be683b68}} 
+static void {\bfseries main} (String\mbox{[}$\,$\mbox{]} args)  throws Exception 
+\item 
+static byte\mbox{[}$\,$\mbox{]} \mbox{\hyperlink{classjrandgen_adfc45ef194bf4ce5c025293a6a073059}{randgen}} (String password, String confusion\+String, int iterations, int size)  throws No\+Such\+Algorithm\+Exception, Invalid\+Key\+Spec\+Exception 
+\begin{DoxyCompactList}\small\item\em \+: Geração de bytes aleatórios usando PBKDF2 e SHA-\/256 \end{DoxyCompactList}\item 
+static byte\mbox{[}$\,$\mbox{]} \mbox{\hyperlink{classjrandgen_a9f3285093be770a8e5bb6f558c232f78}{generate\+Random\+Bytes}} (int stream\+Size, byte\mbox{[}$\,$\mbox{]} seed)
+\begin{DoxyCompactList}\small\item\em \+: Geração de bytes aleatórios usando SHA-\/256 \end{DoxyCompactList}\item 
+static boolean \mbox{\hyperlink{classjrandgen_a90f2cb7809e0dd72b84f7f1f57b3404d}{verificar\+Padrao}} (byte\mbox{[}$\,$\mbox{]} A, byte\mbox{[}$\,$\mbox{]} B)
+\begin{DoxyCompactList}\small\item\em \+: Verificar se um array de bytes contém um padrão \end{DoxyCompactList}\item 
+static String \mbox{\hyperlink{classjrandgen_ad3efb2a18a88fd1956fe552060b1f37f}{encode\+To\+Base64}} (byte\mbox{[}$\,$\mbox{]} data)
+\begin{DoxyCompactList}\small\item\em \+: Remover o byte de sinal de um array de bytes \end{DoxyCompactList}\item 
+static void \mbox{\hyperlink{classjrandgen_a301ccec97a5d3f7197fde2c05c0ca0b7}{setup\+Performance}} (int\mbox{[}$\,$\mbox{]} password\+\_\+sizes, int\mbox{[}$\,$\mbox{]} salt\+\_\+sizes, int\mbox{[}$\,$\mbox{]} iteration\+\_\+counts)  throws No\+Such\+Algorithm\+Exception, Invalid\+Key\+Spec\+Exception 
+\begin{DoxyCompactList}\small\item\em Remover o byte de sinal de um array de bytes. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classjrandgen_a0d32e1d65f74d774e865efd267288321}\label{classjrandgen_a0d32e1d65f74d774e865efd267288321}} 
+static final String {\bfseries PBKDF2\+\_\+\+ALGORITHM} = \char`\"{}PBKDF2\+With\+Hmac\+SHA256\char`\"{}
+\item 
+\mbox{\Hypertarget{classjrandgen_a82e4269bd3e0fb98ea84bb5b8dc32215}\label{classjrandgen_a82e4269bd3e0fb98ea84bb5b8dc32215}} 
+static final int {\bfseries SIZE\+\_\+\+STREAM} = 4096
+\item 
+\mbox{\Hypertarget{classjrandgen_aba996fad24708804638f5d507ec22e20}\label{classjrandgen_aba996fad24708804638f5d507ec22e20}} 
+static final int {\bfseries SEED} = 32
+\item 
+\mbox{\Hypertarget{classjrandgen_a68fc623a1330676e2aef2a3877b51634}\label{classjrandgen_a68fc623a1330676e2aef2a3877b51634}} 
+static final int {\bfseries SHA256\+\_\+\+DIGEST\+\_\+\+LENGTH} = 32
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classjrandgen_ad3efb2a18a88fd1956fe552060b1f37f}\label{classjrandgen_ad3efb2a18a88fd1956fe552060b1f37f}} 
+\index{jrandgen@{jrandgen}!encodeToBase64@{encodeToBase64}}
+\index{encodeToBase64@{encodeToBase64}!jrandgen@{jrandgen}}
+\doxysubsubsection{\texorpdfstring{encodeToBase64()}{encodeToBase64()}}
+{\footnotesize\ttfamily static String jrandgen.\+encode\+To\+Base64 (\begin{DoxyParamCaption}\item[{byte\mbox{[}$\,$\mbox{]}}]{data }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+\+: Remover o byte de sinal de um array de bytes 
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & -\/ Array de bytes a remover o byte de sinal \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+data -\/ Array de bytes sem o byte de sinal 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classjrandgen_a9f3285093be770a8e5bb6f558c232f78}\label{classjrandgen_a9f3285093be770a8e5bb6f558c232f78}} 
+\index{jrandgen@{jrandgen}!generateRandomBytes@{generateRandomBytes}}
+\index{generateRandomBytes@{generateRandomBytes}!jrandgen@{jrandgen}}
+\doxysubsubsection{\texorpdfstring{generateRandomBytes()}{generateRandomBytes()}}
+{\footnotesize\ttfamily static byte \mbox{[}$\,$\mbox{]} jrandgen.\+generate\+Random\+Bytes (\begin{DoxyParamCaption}\item[{int}]{stream\+Size,  }\item[{byte\mbox{[}$\,$\mbox{]}}]{seed }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+\+: Geração de bytes aleatórios usando SHA-\/256 
+
+
+\begin{DoxyParams}{Parameters}
+{\em } & stream\+Size -\/ Tamanho do output em bytes \\
+\hline
+{\em } & seed -\/ Seed para gerar a stream\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\+: stream -\/ Bytes aleatórios gerados 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classjrandgen_adfc45ef194bf4ce5c025293a6a073059}\label{classjrandgen_adfc45ef194bf4ce5c025293a6a073059}} 
+\index{jrandgen@{jrandgen}!randgen@{randgen}}
+\index{randgen@{randgen}!jrandgen@{jrandgen}}
+\doxysubsubsection{\texorpdfstring{randgen()}{randgen()}}
+{\footnotesize\ttfamily static byte \mbox{[}$\,$\mbox{]} jrandgen.\+randgen (\begin{DoxyParamCaption}\item[{String}]{password,  }\item[{String}]{confusion\+String,  }\item[{int}]{iterations,  }\item[{int}]{size }\end{DoxyParamCaption}) throws No\+Such\+Algorithm\+Exception, Invalid\+Key\+Spec\+Exception\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+\+: Geração de bytes aleatórios usando PBKDF2 e SHA-\/256 
+
+
+\begin{DoxyParams}{Parameters}
+{\em } & password -\/ Senha para gerar a chave \\
+\hline
+{\em } & confusion\+String -\/ String de confusão para gerar a chave \\
+\hline
+{\em } & iterations -\/ Número de iterações para gerar a chave \\
+\hline
+{\em } & size -\/ Tamanho do output em bytes\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\+: stream -\/ Bytes aleatórios gerados 
+\end{DoxyReturn}
+\mbox{\Hypertarget{classjrandgen_a301ccec97a5d3f7197fde2c05c0ca0b7}\label{classjrandgen_a301ccec97a5d3f7197fde2c05c0ca0b7}} 
+\index{jrandgen@{jrandgen}!setupPerformance@{setupPerformance}}
+\index{setupPerformance@{setupPerformance}!jrandgen@{jrandgen}}
+\doxysubsubsection{\texorpdfstring{setupPerformance()}{setupPerformance()}}
+{\footnotesize\ttfamily static void jrandgen.\+setup\+Performance (\begin{DoxyParamCaption}\item[{int\mbox{[}$\,$\mbox{]}}]{password\+\_\+sizes,  }\item[{int\mbox{[}$\,$\mbox{]}}]{salt\+\_\+sizes,  }\item[{int\mbox{[}$\,$\mbox{]}}]{iteration\+\_\+counts }\end{DoxyParamCaption}) throws No\+Such\+Algorithm\+Exception, Invalid\+Key\+Spec\+Exception\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+Remover o byte de sinal de um array de bytes. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em password\+\_\+sizes} & Tamanhos das passwords a testar \\
+\hline
+{\em salt\+\_\+sizes} & Tamanhos dos salts a testar \\
+\hline
+{\em iteration\+\_\+counts} & Número de iterações a testar \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyExceptions}{Exceptions}
+{\em No\+Such\+Algorithm\+Exception} & \\
+\hline
+{\em Invalid\+Key\+Spec\+Exception} & \\
+\hline
+\end{DoxyExceptions}
+\mbox{\Hypertarget{classjrandgen_a90f2cb7809e0dd72b84f7f1f57b3404d}\label{classjrandgen_a90f2cb7809e0dd72b84f7f1f57b3404d}} 
+\index{jrandgen@{jrandgen}!verificarPadrao@{verificarPadrao}}
+\index{verificarPadrao@{verificarPadrao}!jrandgen@{jrandgen}}
+\doxysubsubsection{\texorpdfstring{verificarPadrao()}{verificarPadrao()}}
+{\footnotesize\ttfamily static boolean jrandgen.\+verificar\+Padrao (\begin{DoxyParamCaption}\item[{byte\mbox{[}$\,$\mbox{]}}]{A,  }\item[{byte\mbox{[}$\,$\mbox{]}}]{B }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+\+: Verificar se um array de bytes contém um padrão 
+
+
+\begin{DoxyParams}{Parameters}
+{\em } & A -\/ Array de bytes a verificar \\
+\hline
+{\em } & B -\/ Array de bytes que contém o padrão\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\+: true -\/ Se o array de bytes contém o padrão 
+
+\+: false -\/ Se o array de bytes não contém o padrão 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{jrandgen_8java}{jrandgen.\+java}}\end{DoxyCompactItemize}

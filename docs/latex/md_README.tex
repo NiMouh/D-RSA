@@ -1,0 +1,135 @@
+\hypertarget{md_README_autotoc_md1}{}\doxysection{Autores}\label{md_README_autotoc_md1}
+
+\begin{DoxyItemize}
+\item Ana Raquel Neves Vidal
+\item Simão Augusto Ferreira Andrade
+\end{DoxyItemize}\hypertarget{md_README_autotoc_md2}{}\doxysection{Linguagens de programação utilizadas}\label{md_README_autotoc_md2}
+
+\begin{DoxyItemize}
+\item C;
+\item Java;
+\end{DoxyItemize}\hypertarget{md_README_autotoc_md3}{}\doxysection{Objetivos}\label{md_README_autotoc_md3}
+
+\begin{DoxyEnumerate}
+\item Implementar um {\bfseries{gerador de bytes pseudo-\/aleatórios}}, com uma {\itshape seed} com N bytes. A inicialização deste gerador será importante para contribuir para a geração do par de chaves RSA;
+\item Implementar um {\bfseries{gerador de chaves RSA}}, que gere um par de chaves (pública e privada) com base num número primo de N bits, e que guarde as chaves em ficheiros de texto;
+\item Testar a performance do gerador de bytes pseudo-\/aleatórios, em termos de tempo de execução.
+\end{DoxyEnumerate}\hypertarget{md_README_autotoc_md4}{}\doxysection{Bibliotecas}\label{md_README_autotoc_md4}
+
+\begin{DoxyItemize}
+\item \href{https://www.openssl.org/}{\texttt{ Open\+SSL}}
+\item \href{https://docs.oracle.com/javase/7/docs/api/java/math/BigInteger.html}{\texttt{ Big\+Integer}}
+\end{DoxyItemize}\hypertarget{md_README_autotoc_md5}{}\doxysection{Gerador de bytes pseudo-\/aleatórios ($<$em$>$randgen$<$/em$>$)}\label{md_README_autotoc_md5}
+Criação de um PRBG ({\itshape Pseudo-\/\+Random Bit Generator}) que irá gerar um conjunto de bytes pseudo-\/aleatórios.\hypertarget{md_README_autotoc_md6}{}\doxysubsection{Parâmetros de entrada}\label{md_README_autotoc_md6}
+
+\begin{DoxyItemize}
+\item Palavra-\/passe;
+\item {\itshape Confusion string};
+\item Contador de iterações;
+\end{DoxyItemize}\hypertarget{md_README_autotoc_md7}{}\doxysubsection{Pseudo-\/código}\label{md_README_autotoc_md7}
+
+\begin{DoxyEnumerate}
+\item Computar uma {\itshape seed} para a palavra-\/passe, a {\itshape confusion string} e o contador de iterações, usando o método PBKDF2;
+\item Computar uma {\itshape confusion pattern}, neste caso vamos usar o mesmo método que foi usado para computar a {\itshape seed}, pois a {\itshape confusion string} é dada no algortimo PBKDF2 como o {\itshape salt};
+\item Inicializar o gerador com a {\itshape seed};
+\item Começar um ciclo com \textquotesingle{}contador de iterações\textquotesingle{} iterações;
+\begin{DoxyEnumerate}
+\item Usar o PRNG para gerar um conjunto de bytes pseudo-\/aleatórios, até que o padrão da {\itshape confusion pattern} seja encontrado;
+\item Usar o PRNG para produzir a nova {\itshape seed} e usar essa {\itshape seed} para gerar os bytes pseudo-\/aleatórios.
+\end{DoxyEnumerate}
+\end{DoxyEnumerate}
+
+Para o PRNG utilizado foi o {\bfseries{SHA-\/256}}, onde é dada uma {\itshape seed} e é gerado o hash dessa {\itshape seed}, a cada iteração é gerado um novo hash usando o hash anterior como {\itshape seed}.\hypertarget{md_README_autotoc_md8}{}\doxysection{Gerador de chaves RSA ($<$em$>$rsagen$<$/em$>$)}\label{md_README_autotoc_md8}
+O par de chaves RSA será gerado através do gerador de bytes pseudo-\/aleatórios, da seguinte forma\+:\hypertarget{md_README_autotoc_md9}{}\doxysubsection{Pseudo-\/código}\label{md_README_autotoc_md9}
+
+\begin{DoxyEnumerate}
+\item Gerar um conjunto de bytes pseudo-\/aleatórios com o tamanho da chave RSA (em bytes);
+\item Será dividido o conjunto de bytes em dois conjuntos de bytes, sendo que o primeiro conjunto irá representar o nosso {\itshape p} e o segundo conjunto irá representar o nosso {\itshape q}, ambos em formato BIGNUMBER/\+Big\+Integer;
+\item Será verificado se os dois conjuntos de bytes são primos, caso não sejam, o seu valor será incrementado até que sejam primos;
+\item Será calculado o valor de {\itshape n} através da multiplicação {\ttfamily p $\ast$ q};
+\item O valor de {\itshape e} é fixo, sendo que o seu valor é 65537 (2$^\wedge$16 + 1);
+\item Será calculado o valor de {\itshape d} através da função {\itshape modular inverse} de {\itshape e} e {\itshape phi(n)}, sendo que {\itshape phi(n)} é calculado através da multiplicação {\ttfamily (p-\/1) $\ast$ (q-\/1)};
+\end{DoxyEnumerate}\hypertarget{md_README_autotoc_md10}{}\doxysection{Armazenamento das chaves RSA ($<$em$>$storekeys$<$/em$>$)}\label{md_README_autotoc_md10}
+Será guardado o par de chaves RSA em dois ficheiros de texto, sendo que um deles irá conter a chave pública {\ttfamily (n,e)} e o outro irá conter a chave privada {\ttfamily (n,d)}.
+
+Para armazenar ambas as chaves foi usado o padrão DER ({\itshape Distinguished Encoding Rules}), sendo que o padrão DER é um formato binário que é codificado em base64 para ser guardado no ficheiro PEM.
+
+Este padrão tem a seguinte estrutura\+:
+\begin{DoxyEnumerate}
+\item Byte de Início de Sequência ({\ttfamily 0x30})\+: Indica o início de uma sequência de DER.
+\item Tamanho Total da Sequência\+: O tamanho da sequência que inclui N e E.
+\item Byte de Separação para N ({\ttfamily 0x02})\+: Indica o início de um número inteiro.
+\item Tamanho do N\+: O tamanho do módulo N.
+\item N (Modulus)\+: Os bytes que representam o módulo.
+\item Byte de Separação para E ({\ttfamily 0x02})\+: Indica o início de outro número inteiro.
+\item Tamanho do E\+: O tamanho do expoente público E.
+\item E (Public Exponent)\+: Os bytes que representam o expoente público.
+\end{DoxyEnumerate}\hypertarget{md_README_autotoc_md11}{}\doxysection{Execução do programa}\label{md_README_autotoc_md11}
+\hypertarget{md_README_autotoc_md12}{}\doxysubsection{Em C}\label{md_README_autotoc_md12}
+Para compilar o programa em C, basta executar o makefile, através do comando {\ttfamily make}, e será criado um executável chamado {\itshape randgen}, outro chamado {\itshape rsagen} e outro chamado {\itshape performance}.
+
+Para executar o programa {\itshape randgen} basta executar o seguinte comando\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{simao@root\$ ./randgen <password> <confusion string> <iterations>}
+
+\end{DoxyCode}
+
+
+Nota\+: Sendo que o resultado será retornado para o {\itshape stdout}.
+
+Para executar o programa {\itshape rsagen} basta executar o seguinte comando\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{simao@root\$ ./rsagen}
+
+\end{DoxyCode}
+
+
+Para executar o programa {\itshape performance} basta executar o seguinte comando\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{simao@root\$ ./performance}
+
+\end{DoxyCode}
+
+
+Nota\+: Sendo que a entrada do programa será feita através do {\itshape stdin}.
+
+De modo a executar ambos utilizando o {\itshape pipe}, basta executar o seguinte comando\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{simao@root\$ ./randgen <password> <confusion string> <iterations> | ./rsagen}
+
+\end{DoxyCode}
+\hypertarget{md_README_autotoc_md13}{}\doxysubsection{Em Java}\label{md_README_autotoc_md13}
+Para compilar o programa em Java, basta executar o seguinte comando\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{ana@root\$ javac *.java}
+
+\end{DoxyCode}
+
+
+Para executar o programa {\itshape randgen} basta executar o seguinte comando\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{ana@root\$ java randgen <password> <confusion string> <iterations>}
+
+\end{DoxyCode}
+
+
+Nota\+: Sendo que o resultado será retornado para o {\itshape stdout}.
+
+Para executar o programa {\itshape jrsagen} basta executar o seguinte comando\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{ana@root\$ java jrsagen}
+
+\end{DoxyCode}
+
+
+Nota\+: Sendo que a entrada do programa será feita através do {\itshape stdin}.
+
+De modo a executar ambos utilizando o {\itshape pipe}, basta executar o seguinte comando\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{ana@root\$ java jrandgen <password> <confusion string> <iterations> | java rsagen}
+
+\end{DoxyCode}
+\hypertarget{md_README_autotoc_md14}{}\doxysection{Testes de performance}\label{md_README_autotoc_md14}
+Devido á grande computação que é feita pela aplicação {\itshape randgen}, apenas foi testado a performance do {\itshape setup} do gerador de bytes pseudo-\/aleatórios.\hypertarget{md_README_autotoc_md15}{}\doxysubsection{C}\label{md_README_autotoc_md15}
+Por fazer...\hypertarget{md_README_autotoc_md16}{}\doxysubsection{Java}\label{md_README_autotoc_md16}
+Por fazer... 

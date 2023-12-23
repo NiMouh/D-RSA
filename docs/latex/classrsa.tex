@@ -1,0 +1,77 @@
+\hypertarget{classrsa}{}\doxysection{rsa Class Reference}
+\label{classrsa}\index{rsa@{rsa}}
+
+
+Collaboration diagram for rsa\+:
+% FIG 0
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classrsa_ada657caf5786c8ffdbd3ec55a14f15be}\label{classrsa_ada657caf5786c8ffdbd3ec55a14f15be}} 
+static void {\bfseries main} (String\mbox{[}$\,$\mbox{]} args)  throws Exception 
+\item 
+\mbox{\Hypertarget{classrsa_aff0efc7eec770537c7af023fa02fcc3d}\label{classrsa_aff0efc7eec770537c7af023fa02fcc3d}} 
+static byte\mbox{[}$\,$\mbox{]} {\bfseries generate\+Random\+Bytes} (int stream\+Size, byte\mbox{[}$\,$\mbox{]} seed)
+\item 
+\mbox{\Hypertarget{classrsa_a9756ab3b5666c2da5e068d891b301f33}\label{classrsa_a9756ab3b5666c2da5e068d891b301f33}} 
+static String {\bfseries encode\+To\+Base64} (byte\mbox{[}$\,$\mbox{]} data)
+\item 
+\mbox{\Hypertarget{classrsa_a380a292c3b47efd1326f913bc8c4e166}\label{classrsa_a380a292c3b47efd1326f913bc8c4e166}} 
+static boolean {\bfseries verificar\+Padrao} (byte\mbox{[}$\,$\mbox{]} A, byte\mbox{[}$\,$\mbox{]} B)
+\item 
+\mbox{\Hypertarget{classrsa_ad689a351ef60bfaf3d1428c02e619fae}\label{classrsa_ad689a351ef60bfaf3d1428c02e619fae}} 
+static byte\mbox{[}$\,$\mbox{]} {\bfseries randgen} (String password, String confusion\+String, int iterations, int size)  throws No\+Such\+Algorithm\+Exception, Invalid\+Key\+Spec\+Exception 
+\item 
+\mbox{\Hypertarget{classrsa_a25e08d21f51d706b8e499a3dbee6b888}\label{classrsa_a25e08d21f51d706b8e499a3dbee6b888}} 
+static byte\mbox{[}$\,$\mbox{]} {\bfseries remove\+Sign\+Byte} (byte\mbox{[}$\,$\mbox{]} bytes)
+\item 
+\mbox{\Hypertarget{classrsa_a8b98ddd8cf6078f7a9f5f8558a1088fc}\label{classrsa_a8b98ddd8cf6078f7a9f5f8558a1088fc}} 
+static byte\mbox{[}$\,$\mbox{]} {\bfseries generate\+DEREncoding\+Public} (Big\+Integer N, Big\+Integer e)
+\item 
+\mbox{\Hypertarget{classrsa_a78f0009a38dd7b7d76f88fcae7dd38aa}\label{classrsa_a78f0009a38dd7b7d76f88fcae7dd38aa}} 
+static byte\mbox{[}$\,$\mbox{]} {\bfseries generate\+DEREncoding\+Private} (Big\+Integer n, Big\+Integer d)
+\item 
+\mbox{\Hypertarget{classrsa_a53792ac156a15c93e76937c6b949b63e}\label{classrsa_a53792ac156a15c93e76937c6b949b63e}} 
+static String {\bfseries bytes\+To\+Hex} (byte\mbox{[}$\,$\mbox{]} bytes)
+\item 
+\mbox{\Hypertarget{classrsa_a0e44316bbebafb93c9b9df1bd2c6039c}\label{classrsa_a0e44316bbebafb93c9b9df1bd2c6039c}} 
+static Big\+Integer\mbox{[}$\,$\mbox{]}\mbox{[}$\,$\mbox{]} {\bfseries rsagen} (byte\mbox{[}$\,$\mbox{]} random\+\_\+stream\+\_\+bytes)  throws Exception 
+\item 
+\mbox{\Hypertarget{classrsa_a470c34b58ccf98b177a23e3b92b51b64}\label{classrsa_a470c34b58ccf98b177a23e3b92b51b64}} 
+static void {\bfseries store\+Key\+Pair} (Big\+Integer\mbox{[}$\,$\mbox{]}\mbox{[}$\,$\mbox{]} key\+Pair)  throws IOException 
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classrsa_a6ca07d187984364d9070c3e5bf8062d1}\label{classrsa_a6ca07d187984364d9070c3e5bf8062d1}} 
+static final String {\bfseries PBKDF2\+\_\+\+ALGORITHM} = \char`\"{}PBKDF2\+With\+Hmac\+SHA256\char`\"{}
+\item 
+\mbox{\Hypertarget{classrsa_a9c699e73468751b36ebbd568c24e5063}\label{classrsa_a9c699e73468751b36ebbd568c24e5063}} 
+static final int {\bfseries SIZE\+\_\+\+STREAM} = 4096
+\item 
+\mbox{\Hypertarget{classrsa_acfee53aa31959522273f26829216d48e}\label{classrsa_acfee53aa31959522273f26829216d48e}} 
+static final int {\bfseries ITERATIONS} = 10
+\item 
+\mbox{\Hypertarget{classrsa_ad49d4411cb6069194f3adf92b011e954}\label{classrsa_ad49d4411cb6069194f3adf92b011e954}} 
+static final String {\bfseries PASSWORD} = \char`\"{}password\char`\"{}
+\item 
+\mbox{\Hypertarget{classrsa_a18de459c16a00192424102bb589e7245}\label{classrsa_a18de459c16a00192424102bb589e7245}} 
+static final String {\bfseries CONFUSION\+\_\+\+STRING} = \char`\"{}abc\char`\"{}
+\item 
+\mbox{\Hypertarget{classrsa_a353089f02e74489c00b341ae7921c69b}\label{classrsa_a353089f02e74489c00b341ae7921c69b}} 
+static final int {\bfseries SEED} = 32
+\item 
+\mbox{\Hypertarget{classrsa_aca2abea0617c9ed38a48f0e8392620ca}\label{classrsa_aca2abea0617c9ed38a48f0e8392620ca}} 
+static final int {\bfseries SHA256\+\_\+\+DIGEST\+\_\+\+LENGTH} = 32
+\item 
+\mbox{\Hypertarget{classrsa_a8ac3b3347f88ee54e3d768674f926b46}\label{classrsa_a8ac3b3347f88ee54e3d768674f926b46}} 
+static final int {\bfseries PRIME\+\_\+\+SIZE} = 256
+\item 
+\mbox{\Hypertarget{classrsa_af764735f99f059d012652babc351b680}\label{classrsa_af764735f99f059d012652babc351b680}} 
+static final Big\+Integer {\bfseries e} = Big\+Integer.\+value\+Of(65537)
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+rsa.\+java\end{DoxyCompactItemize}

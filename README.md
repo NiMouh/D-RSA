@@ -48,10 +48,28 @@ O par de chaves RSA será gerado através do gerador de bytes pseudo-aleatórios
 
 
 ## Armazenamento das chaves RSA (*storekeys*)
-Será guardado o par de chaves RSA em dois ficheiros de texto, sendo que um deles irá conter a chave pública `(n,e)` e o outro irá conter a chave privada `(n,d)`, ambos em codificados base64.
+Será guardado o par de chaves RSA em dois ficheiros de texto, sendo que um deles irá conter a chave pública `(n,e)` e o outro irá conter a chave privada `(n,d)`.
+
+Para armazenar ambas as chaves foi usado o padrão DER (*Distinguished Encoding Rules*), sendo que o padrão DER é um formato binário que é codificado em base64 para ser guardado no ficheiro PEM.
+
+Este padrão tem a seguinte estrutura:
+1. Byte de Início de Sequência (`0x30`): Indica o início de uma sequência de DER.
+2. Tamanho Total da Sequência: O tamanho da sequência que inclui N e E.
+3. Byte de Separação para N (`0x02`): Indica o início de um número inteiro.
+4. Tamanho do N: O tamanho do módulo N.
+5. N (Modulus): Os bytes que representam o módulo.
+6. Byte de Separação para E (`0x02`): Indica o início de outro número inteiro.
+7. Tamanho do E: O tamanho do expoente público E.
+8. E (Public Exponent): Os bytes que representam o expoente público.
 
 
 ## Execução do programa
+
+### Atualizar documentação
+Para criar/atualizar a documentação do programa, basta executar o seguinte comando:
+```bash
+simao@root$ doxygen Doxyfile
+```
 
 ### Em C
 
@@ -95,16 +113,16 @@ ana@root$ java randgen <password> <confusion string> <iterations>
 
 Nota: Sendo que o resultado será retornado para o *stdout*.
 
-Para executar o programa *rsagen* basta executar o seguinte comando:
+Para executar o programa *jrsagen* basta executar o seguinte comando:
 ```bash
-ana@root$ java rsagen
+ana@root$ java jrsagen
 ```
 
 Nota: Sendo que a entrada do programa será feita através do *stdin*.
 
 De modo a executar ambos utilizando o *pipe*, basta executar o seguinte comando:
 ```bash
-ana@root$ java randgen <password> <confusion string> <iterations> | java rsagen
+ana@root$ java jrandgen <password> <confusion string> <iterations> | java rsagen
 ```
 
 
