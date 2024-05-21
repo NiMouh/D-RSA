@@ -1,4 +1,4 @@
-# Trabalho Prático 2 - Geração deterministica de chaves RSA
+# *Deterministic RSA Key Generation*
 
 ## Autores
 - Ana Raquel Neves Vidal
